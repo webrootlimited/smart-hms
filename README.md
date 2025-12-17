@@ -1,1 +1,1 @@
-# Smart-Hms | Hospital Management System
+# Smart HMS | Smart Hospital management System
