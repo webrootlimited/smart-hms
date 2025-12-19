@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useState } from 'react';
 
 const providers = [
@@ -128,8 +129,8 @@ export default function AllProviders() {
                         <button
                             onClick={() => setViewMode('list')}
                             className={`w-full sm:w-auto px-5 py-3 flex items-center justify-center gap-2 rounded-lg shadow-sm border border-gray-200 transition-all text-sm sm:text-base ${viewMode === 'list'
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white text-gray-700 hover:bg-gray-50'
                                 }`}
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,8 +142,8 @@ export default function AllProviders() {
                         <button
                             onClick={() => setViewMode('card')}
                             className={`w-full sm:w-auto px-5 py-3 flex items-center justify-center gap-2 rounded-lg shadow-sm border border-gray-200 transition-all text-sm sm:text-base ${viewMode === 'card'
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white text-gray-700 hover:bg-gray-50'
                                 }`}
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,9 +269,9 @@ export default function AllProviders() {
 
                                     {/* ACTIONS */}
                                     <div className="flex gap-2 sm:gap-3 mt-5 sm:mt-6">
-                                        <button className="flex-1 border border-blue-400 text-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-blue-700 hover:text-white transition">
+                                        <Link href="/admin/providers/1" className="flex-1 border border-blue-400 text-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-blue-700 hover:text-white transition">
                                             View Profile
-                                        </button>
+                                        </Link>
 
                                         <button className="p-2 sm:p-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                                             <svg
@@ -368,9 +369,9 @@ export default function AllProviders() {
 
                                         {/* Action buttons - responsive stack on mobile */}
                                         <div className="flex items-center gap-2 sm:gap-3 lg:ml-6">
-                                            <button className="flex-1 lg:flex-none border border-blue-400 text-blue-600 px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-blue-700 hover:text-white transition whitespace-nowrap">
+                                            <Link href="/admin/providers/1" className="flex-1 lg:flex-none border border-blue-400 text-blue-600 px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-blue-700 hover:text-white transition whitespace-nowrap">
                                                 View Profile
-                                            </button>
+                                            </Link>
                                             {/* Edit Icon */}
                                             <button className="p-2 sm:p-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                                                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

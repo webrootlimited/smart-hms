@@ -14,6 +14,8 @@ import {
     CreditCard,
 } from "lucide-react";
 import { useState } from "react";
+import logo from "@/assets/logo.png";
+import Image from "next/image";
 
 const navLinks = [
     {
@@ -79,9 +81,11 @@ export default function Sidebar() {
     const sidebarContent = (
         <div className="bg-white w-64 h-screen flex flex-col py-3 px-4">
             {/* Logo */}
-            <div className="flex items-center justify-start gap-3 mb-6 shrink-0">
-                <span className="w-10 h-10 rounded-full bg-blue-500"></span>
-                <span className="font-bold text-2xl">SmartHMS</span>
+            <div className="flex items-center mb-6 gap-3 flex-shrink-0">
+                <Image src={logo} className="w-10 h-10" alt="Logo" />
+                <div><span className="font-bold text-2xl">Smart</span>
+                    <span className="font-bold text-2xl bg-gradient-to-b from-[#0284C7] to-[#0369A1]
+                                      bg-clip-text text-transparent">HMS</span></div>
             </div>
 
             {/* Navigation (SCROLLABLE) */}

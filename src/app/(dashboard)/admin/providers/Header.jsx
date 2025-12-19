@@ -3,6 +3,7 @@ import React from 'react';
 import { Users, UserPlus, ChevronRight } from 'lucide-react';
 import usersImg from '@/assets/admin-dashboard/providers-header.png';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Header() {
     return (
@@ -64,11 +65,11 @@ export default function Header() {
                     </div>
 
                     {/* Add New User Button */}
-                    <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-full shadow-lg flex items-center justify-center gap-2 transition-all hover:shadow-xl text-sm">
+                    <Link href="/admin/providers/add-new-provider" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-full shadow-lg flex items-center justify-center gap-2 transition-all hover:shadow-xl text-sm">
                         <UserPlus className="w-5 h-5" />
                         <span>Add Provider</span>
                         <ChevronRight className="w-4 h-4" />
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>

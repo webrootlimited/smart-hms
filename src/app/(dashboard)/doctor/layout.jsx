@@ -8,7 +8,7 @@ export default function DashboardLayout({ children }) {
     const pathname = usePathname();
 
     // If route contains /telehealth → hide sidebar + header
-    const hideLayout = pathname?.includes("/appointments") || pathname?.includes("/telehealth-waiting-room") || pathname?.includes("/telehealth-session") || pathname?.includes("/patient-queue");
+    const hideLayout = pathname?.includes("/telehealth/");
 
     if (hideLayout) {
         return <>{children}</>; // show ONLY page content

@@ -4,6 +4,7 @@ import { Users, UserPlus, ChevronRight, Settings, Activity, Lock, ClipboardList,
 
 import usersImg from '@/assets/admin-dashboard/appointments-header-img.png';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Header() {
     return (
@@ -17,10 +18,9 @@ export default function Header() {
                             <Calendar className="w-6 h-6" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900">Edit user Profile</h2>
+                            <h2 className="text-xl font-semibold text-gray-900">Appointment Types</h2>
                             <p className="text-sm text-gray-500 mt-1">
-                                Update user information and manage permissions
-                            </p>
+                                Manage all appointment types available for booking                            </p>
                         </div>
                     </div>
 
@@ -66,13 +66,13 @@ export default function Header() {
                     </div>
 
                     {/* Add New User Button */}
-                    <button className="w-full sm:w-auto bg-[linear-gradient(180deg,#0284C7_0%,#0369A1_100%)]
+                    <Link href="/admin/appointments/add-appointment-type" className="w-full sm:w-auto bg-[linear-gradient(180deg,#0284C7_0%,#0369A1_100%)]
 
  hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-full shadow-lg flex items-center justify-center gap-2 transition-all hover:shadow-xl text-sm">
                         <UserPlus className="w-5 h-5" />
-                        <span>Save Changes</span>
+                        <span>Add Appointment Type</span>
                         <ChevronRight className="w-4 h-4" />
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>

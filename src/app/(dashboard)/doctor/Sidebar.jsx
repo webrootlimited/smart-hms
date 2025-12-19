@@ -2,18 +2,22 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Calendar, MessageSquare, Pill, FileText, Video, Heart, Menu, X, Settings, Users } from "lucide-react";
+import { Calendar, MessageSquare, Pill, FileText, Video, Heart, Menu, X, Settings, Users, Bell } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
+import logo from "@/assets/logo.png";
 
 const navLinks = [
     { name: "Dashboard", icon: Heart, href: "/doctor/dashboard" },
     { name: "Appointments", icon: Calendar, href: "/doctor/appointments" },
     { name: "Telehealth", icon: MessageSquare, href: "/doctor/telehealth", badge: 3 },
-    { name: "Patient Queue", icon: Pill, href: "/doctor/prescriptions" },
-    { name: "Tasks", icon: FileText, href: "/doctor/medical-records" },
-    { name: "Patients", icon: Users, href: "/doctor/doctors" },
+    { name: "Patient Queue", icon: Pill, href: "/doctor/patient-queue" },
+    { name: "Tasks", icon: FileText, href: "/doctor/tasks" },
+    { name: "Patients", icon: Users, href: "/doctor/patients" },
     { name: "Prescriptions", icon: FileText, href: "/doctor/prescriptions" },
-    { name: "Messages", icon: MessageSquare, href: "/doctor/messages" },
+    { name: "Messages", icon: Bell, href: "/doctor/messages" },
+    { name: "Notifications", icon: Bell, href: "/doctor/notifications" },
+    { name: "Settings", icon: Settings, href: "/doctor/settings" },
 ];
 
 export default function Sidebar() {
@@ -27,8 +31,10 @@ export default function Sidebar() {
         <div className="flex flex-col h-screen justify-between pb-15 lg:pb-5 w-64 py-3 px-4">
             {/* Logo */}
             <div className="flex items-center gap-3 mb-4 flex-shrink-0">
-                <span className="w-10 h-10 rounded-full bg-blue-500"></span>
-                <span className="font-bold text-2xl">SmartHMS</span>
+                <Image src={logo} className="w-10 h-10" alt="Logo" />
+                <div><span className="font-bold text-2xl">Smart</span>
+                    <span className="font-bold text-2xl bg-gradient-to-b from-[#0284C7] to-[#0369A1]
+bg-clip-text text-transparent">HMS</span></div>
             </div>
 
             {/* Navigation */}
@@ -43,8 +49,8 @@ export default function Sidebar() {
                             onClick={() => setIsOpen(false)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition
                                 ${isActive
-                                    ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500 shadow"
-                                    : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"
+                                    ? "bg-gradient-to-b from-[#0284C7] to-[#0369A1] text-white border-l-4 border-blue-500 shadow"
+                                    : "text-gray-600 hover:bg-gradient-to-b from-[#0284C7] to-[#0369A1] hover:text-white"
                                 }`}
                         >
                             <Icon className="w-5 h-5" />
@@ -61,17 +67,7 @@ export default function Sidebar() {
 
             {/* Bottom Settings Link */}
             <div className="flex-shrink-0">
-                <Link
-                    href="/doctor/settings"
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition
-                        ${pathname === "/doctor/settings"
-                            ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500 shadow"
-                            : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"
-                        }`}
-                >
-                    <Settings className="w-5 h-5" />
-                    <span className="text-sm font-medium">Settings</span>
-                </Link>
+
 
                 {/* Premium Card */}
                 <div className=" relative w-full px-4">

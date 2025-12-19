@@ -1,10 +1,28 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Mic, MicOff, Video, PhoneOff, Shield, Paperclip, Smile, Send, MessageSquare, X, LogOut } from "lucide-react"
 
 export default function VideoCallScreen() {
     const [isChatOpen, setIsChatOpen] = useState(true)
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 900) {
+                setIsChatOpen(false);
+            } else {
+                setIsChatOpen(true);
+            }
+        };
+
+        // Run once on mount
+        handleResize();
+
+        // Listen to resize
+        window.addEventListener("resize", handleResize);
+
+        // Cleanup
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     return (
         <div className="w-full bg-[conic-gradient(from_180deg_at_50%_50%,_rgba(2,132,199,0.3)_0deg,_rgba(181,219,238,0.797368)_43.27deg,_#FEFEFE_211.15deg,_rgba(139,198,229,0.680702)_347.88deg,_rgba(2,132,199,0.3)_360deg)] h-screen flex flex-col">

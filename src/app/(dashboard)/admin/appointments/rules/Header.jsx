@@ -16,7 +16,7 @@ export default function Header() {
                     {/* Back Link */}
                     <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 text-sm font-medium">
                         <ArrowLeft className="w-4 h-4" />
-                        Back to User List
+                        Back to Appointment Types
                     </button>
 
                     {/* Title and Description */}
@@ -27,10 +27,10 @@ export default function Header() {
                         </div>
                         <div>
                             <h1 className="text-xl font-semibold text-gray-900">
-                                Add New Appointment Type
+                                Appointment Rules
                             </h1>
                             <p className="text-sm text-gray-600 mt-1">
-                                Configure a new visit type patients can book
+                                Configure policies, fees, and restrictions for appointment booking
                             </p>
                         </div>
                     </div>

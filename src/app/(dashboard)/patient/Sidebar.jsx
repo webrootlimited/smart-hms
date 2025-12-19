@@ -2,9 +2,10 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Calendar, MessageSquare, Pill, FileText, Video, Heart, Menu, X } from "lucide-react";
+import { Calendar, MessageSquare, Pill, FileText, Video, Heart, Menu, X, CreditCard, User } from "lucide-react";
 import { useState } from "react";
-
+import Image from "next/image";
+import logo from "@/assets/logo.png";
 const navLinks = [
     { name: "Dashboard", icon: Heart, href: "/patient/dashboard" },
     { name: "Appointments", icon: Calendar, href: "/patient/appointments" },
@@ -12,6 +13,8 @@ const navLinks = [
     { name: "Prescriptions", icon: Pill, href: "/patient/prescriptions" },
     { name: "Medical Records", icon: FileText, href: "/patient/medical-records" },
     { name: "Telehealth", icon: Video, href: "/patient/telehealth" },
+    { name: "Payment Methods", icon: CreditCard, href: "/patient/payments" },
+    { name: "Profile", icon: User, href: "/patient/profile" },
 ];
 
 export default function Sidebar() {
@@ -24,13 +27,15 @@ export default function Sidebar() {
     const sidebarContent = (
         <div className="bg-white w-64 h-screen pb-30 lg:pb-5 flex flex-col justify-between py-3 px-4">
             {/* Logo */}
-            <div className="flex items-center justify-start gap-3 mb-10">
-                <span className="w-10 h-10 rounded-full bg-blue-500"></span>
-                <span className="font-bold text-2xl">SmartHMS</span>
+            <div className="flex items-center gap-3 mb-4 flex-shrink-0">
+                <Image src={logo} className="w-10 h-10" alt="Logo" />
+                <div><span className="font-bold text-2xl">Smart</span>
+                    <span className="font-bold text-2xl bg-gradient-to-b from-[#0284C7] to-[#0369A1]
+           bg-clip-text text-transparent">HMS</span></div>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 space-y-2">
+            <nav className="flex-1 space-y-2 overflow-y-auto">
                 {navLinks.map((link) => {
                     const Icon = link.icon;
                     const isActive = pathname === link.href;
