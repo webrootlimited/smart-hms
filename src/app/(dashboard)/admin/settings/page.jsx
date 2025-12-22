@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { 
-  Settings, Globe, Shield, Zap, Clock, Database, Bell, 
+import {
+  Settings, Globe, Shield, Zap, Clock, Database, Bell,
   Mail, AlertTriangle, Lock, UserCheck, RefreshCw, Download, Upload,
   ChevronDown
 } from 'lucide-react';

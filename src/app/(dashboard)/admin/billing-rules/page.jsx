@@ -1,33 +1,34 @@
+'use client';
 
 import React from 'react';
-import { 
+import {
   DollarSign, CreditCard, Shield, Wallet, Banknote, Percent, Tag,
   Settings, Plus, Edit2, Trash2, Calculator, Save
 } from 'lucide-react';
 
 export default function BillingRulesConfiguration() {
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header Card */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-100 rounded-xl">
+              <div className="p-3 bg-green-100 rounded-xl flex-shrink-0">
                 <DollarSign className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">Billing Rules & Configuration</h1>
-                <p className="text-xs text-gray-500 mt-0.5">Manage payment methods, pricing, and billing settings</p>
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Billing Rules & Configuration</h1>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Manage payment methods, pricing, and billing settings</p>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <button className="px-5 py-2.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 flex items-center justify-center gap-2">
+              <button className="px-5 py-2.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 flex items-center justify-center gap-2 w-full sm:w-auto">
                 <DollarSign className="w-4 h-4" />
                 Create Invoice
               </button>
-              <button className="px-5 py-2.5 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2">
+              <button className="px-5 py-2.5 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2 w-full sm:w-auto">
                 <Settings className="w-4 h-4" />
                 Settings
               </button>
@@ -35,62 +36,62 @@ export default function BillingRulesConfiguration() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-green-50 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-xs text-green-700 mb-1">
-                <span className="text-lg">↑15%</span>
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-green-700 mb-1">
+                <span className="text-lg sm:text-xl">↑15%</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">$428K</p>
-              <p className="text-xs text-gray-600 mt-1">Total Revenue</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">$428K</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Total Revenue</p>
             </div>
             <div className="bg-blue-50 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-xs text-blue-700 mb-1">
-                <span className="text-lg">↑8%</span>
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-blue-700 mb-1">
+                <span className="text-lg sm:text-xl">↑8%</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">$124K</p>
-              <p className="text-xs text-gray-600 mt-1">Pending Payments</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">$124K</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Pending Payments</p>
             </div>
             <div className="bg-purple-50 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-xs text-purple-700 mb-1">
-                <span className="text-lg">↑12%</span>
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-purple-700 mb-1">
+                <span className="text-lg sm:text-xl">↑12%</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">2,847</p>
-              <p className="text-xs text-gray-600 mt-1">Total Invoices</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">2,847</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Total Invoices</p>
             </div>
             <div className="bg-yellow-50 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-xs text-yellow-700 mb-1">
-                <span className="text-lg">↑6%</span>
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-yellow-700 mb-1">
+                <span className="text-lg sm:text-xl">↑6%</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">96.4%</p>
-              <p className="text-xs text-gray-600 mt-1">Collection Rate</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">96.4%</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Collection Rate</p>
             </div>
           </div>
         </div>
 
         {/* Accepted Payment Methods */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
                 <CreditCard className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Accepted Payment Methods</h2>
-                <p className="text-xs text-gray-500">Configure how patients can pay</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Accepted Payment Methods</h2>
+                <p className="text-xs sm:text-sm text-gray-500">Configure how patients can pay</p>
               </div>
             </div>
-            <button className="px-4 py-2 border border-blue-300 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 flex items-center gap-2">
+            <button className="px-4 py-2 border border-blue-300 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 flex items-center gap-2 w-full sm:w-auto justify-center">
               <Plus className="w-4 h-4" />
               Add Method
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Credit/Debit Card */}
             <div className="bg-green-50 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
                 <div className="flex items-center gap-3">
-                  <CreditCard className="w-5 h-5 text-green-600" />
+                  <CreditCard className="w-5 h-5 text-green-600 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">Credit/Debit Card</p>
                     <p className="text-xs text-gray-600">Card Payment</p>
@@ -105,17 +106,17 @@ export default function BillingRulesConfiguration() {
                 <div className="flex justify-between"><span className="text-gray-600">Transaction Fee</span><span className="font-medium">2.9% + $0.30</span></div>
                 <div className="flex justify-between"><span className="text-gray-600">Processing Time</span><span className="font-medium">Instant</span></div>
               </div>
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4">
                 <span className="text-xs text-green-700 flex items-center gap-1"><span className="w-2 h-2 bg-green-500 rounded-full"></span>Active</span>
-                <button className="text-xs text-blue-600 hover:underline flex items-center gap-1"><Edit2 className="w-3 h-3" />Edit</button>
+                <button className="text-xs text-blue-600 hover:underline flex items-center gap-1 justify-center"><Edit2 className="w-3 h-3" />Edit</button>
               </div>
             </div>
 
             {/* Insurance Claims */}
             <div className="bg-green-50 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
                 <div className="flex items-center gap-3">
-                  <Shield className="w-5 h-5 text-green-600" />
+                  <Shield className="w-5 h-5 text-green-600 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">Insurance Claims</p>
                     <p className="text-xs text-gray-600">Insurance</p>
@@ -130,17 +131,17 @@ export default function BillingRulesConfiguration() {
                 <div className="flex justify-between"><span className="text-gray-600">Transaction Fee</span><span className="font-medium">0%</span></div>
                 <div className="flex justify-between"><span className="text-gray-600">Processing Time</span><span className="font-medium">14-30 days</span></div>
               </div>
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4">
                 <span className="text-xs text-green-700 flex items-center gap-1"><span className="w-2 h-2 bg-green-500 rounded-full"></span>Active</span>
-                <button className="text-xs text-blue-600 hover:underline flex items-center gap-1"><Edit2 className="w-3 h-3" />Edit</button>
+                <button className="text-xs text-blue-600 hover:underline flex items-center gap-1 justify-center"><Edit2 className="w-3 h-3" />Edit</button>
               </div>
             </div>
 
             {/* Cash Payment */}
             <div className="bg-green-50 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
                 <div className="flex items-center gap-3">
-                  <Banknote className="w-5 h-5 text-green-600" />
+                  <Banknote className="w-5 h-5 text-green-600 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">Cash Payment</p>
                     <p className="text-xs text-gray-600">Cash</p>
@@ -155,17 +156,17 @@ export default function BillingRulesConfiguration() {
                 <div className="flex justify-between"><span className="text-gray-600">Transaction Fee</span><span className="font-medium">0%</span></div>
                 <div className="flex justify-between"><span className="text-gray-600">Processing Time</span><span className="font-medium">Instant</span></div>
               </div>
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4">
                 <span className="text-xs text-green-700 flex items-center gap-1"><span className="w-2 h-2 bg-green-500 rounded-full"></span>Active</span>
-                <button className="text-xs text-blue-600 hover:underline flex items-center gap-1"><Edit2 className="w-3 h-3" />Edit</button>
+                <button className="text-xs text-blue-600 hover:underline flex items-center gap-1 justify-center"><Edit2 className="w-3 h-3" />Edit</button>
               </div>
             </div>
 
             {/* Bank Transfer */}
             <div className="bg-yellow-50 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
                 <div className="flex items-center gap-3">
-                  <Wallet className="w-5 h-5 text-yellow-600" />
+                  <Wallet className="w-5 h-5 text-yellow-600 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">Bank Transfer</p>
                     <p className="text-xs text-gray-600">ACH Transfer</p>
@@ -180,17 +181,17 @@ export default function BillingRulesConfiguration() {
                 <div className="flex justify-between"><span className="text-gray-600">Transaction Fee</span><span className="font-medium">0.8%</span></div>
                 <div className="flex justify-between"><span className="text-gray-600">Processing Time</span><span className="font-medium">1-3 days</span></div>
               </div>
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4">
                 <span className="text-xs text-green-700 flex items-center gap-1"><span className="w-2 h-2 bg-green-500 rounded-full"></span>Active</span>
-                <button className="text-xs text-blue-600 hover:underline flex items-center gap-1"><Edit2 className="w-3 h-3" />Edit</button>
+                <button className="text-xs text-blue-600 hover:underline flex items-center gap-1 justify-center"><Edit2 className="w-3 h-3" />Edit</button>
               </div>
             </div>
 
             {/* Digital Wallet */}
             <div className="bg-gray-100 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
                 <div className="flex items-center gap-3">
-                  <Wallet className="w-5 h-5 text-gray-500" />
+                  <Wallet className="w-5 h-5 text-gray-500 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">Digital Wallet</p>
                     <p className="text-xs text-gray-600">Mobile Payment</p>
@@ -205,26 +206,26 @@ export default function BillingRulesConfiguration() {
                 <div className="flex justify-between"><span className="text-gray-600">Transaction Fee</span><span className="font-medium">1.5%</span></div>
                 <div className="flex justify-between"><span className="text-gray-600">Processing Time</span><span className="font-medium">Instant</span></div>
               </div>
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4">
                 <span className="text-xs text-gray-500">Disabled</span>
-                <button className="text-xs text-blue-600 hover:underline flex items-center gap-1"><Edit2 className="w-3 h-3" />Edit</button>
+                <button className="text-xs text-blue-600 hover:underline flex items-center gap-1 justify-center"><Edit2 className="w-3 h-3" />Edit</button>
               </div>
             </div>
           </div>
         </div>
 
         {/* Pricing Tiers & Tax/Fee Settings */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Pricing Tiers */}
-          <div className="bg-white rounded-2xl shadow-sm p-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
+                <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
                   <Tag className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Pricing Tiers</h2>
-                  <p className="text-xs text-gray-500">Service pricing structure</p>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Pricing Tiers</h2>
+                  <p className="text-xs sm:text-sm text-gray-500">Service pricing structure</p>
                 </div>
               </div>
               <button className="p-2 hover:bg-gray-100 rounded-lg">
@@ -235,7 +236,7 @@ export default function BillingRulesConfiguration() {
             <div className="space-y-4">
               {/* Basic Consultation */}
               <div className="bg-gray-50 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
                   <div>
                     <p className="text-sm font-medium text-gray-900">Basic Consultation</p>
                     <p className="text-xs text-gray-600">Standard office visit</p>
@@ -247,7 +248,7 @@ export default function BillingRulesConfiguration() {
                   <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>Medical History Review</li>
                   <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>Basic Diagnosis</li>
                 </ul>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <button className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 flex items-center justify-center gap-1">
                     <Edit2 className="w-3 h-3" />Edit
                   </button>
@@ -259,7 +260,7 @@ export default function BillingRulesConfiguration() {
 
               {/* Comprehensive Visit */}
               <div className="bg-gray-50 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
                   <div>
                     <p className="text-sm font-medium text-gray-900">Comprehensive Visit</p>
                     <p className="text-xs text-gray-600">Detailed examination with tests</p>
@@ -272,7 +273,7 @@ export default function BillingRulesConfiguration() {
                   <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>Imaging</li>
                   <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>Treatment Plan</li>
                 </ul>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <button className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 flex items-center justify-center gap-1">
                     <Edit2 className="w-3 h-3" />Edit
                   </button>
@@ -284,7 +285,7 @@ export default function BillingRulesConfiguration() {
 
               {/* Specialist Consultation */}
               <div className="bg-gray-50 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
                   <div>
                     <p className="text-sm font-medium text-gray-900">Specialist Consultation</p>
                     <p className="text-xs text-gray-600">Expert specialist visit</p>
@@ -296,7 +297,7 @@ export default function BillingRulesConfiguration() {
                   <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>Advanced Diagnostics</li>
                   <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>Treatment Protocol</li>
                 </ul>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <button className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 flex items-center justify-center gap-1">
                     <Edit2 className="w-3 h-3" />Edit
                   </button>
@@ -309,14 +310,14 @@ export default function BillingRulesConfiguration() {
           </div>
 
           {/* Tax & Fee Settings */}
-          <div className="bg-white rounded-2xl shadow-sm p-6">
+          <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-orange-100 rounded-lg">
+              <div className="p-2 bg-orange-100 rounded-lg flex-shrink-0">
                 <Percent className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Tax & Fee Settings</h2>
-                <p className="text-xs text-gray-500">Configure taxes and penalties</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Tax & Fee Settings</h2>
+                <p className="text-xs sm:text-sm text-gray-500">Configure taxes and penalties</p>
               </div>
             </div>
 
@@ -344,8 +345,10 @@ export default function BillingRulesConfiguration() {
                   <p className="text-sm font-medium text-gray-900">Payment Grace Period</p>
                   <p className="text-xs text-gray-600">Current: 30 days</p>
                 </div>
-                <input type="text" defaultValue="30" className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm" />
-                <span className="text-sm text-gray-700 ml-2">days</span>
+                <div className="flex items-center gap-2">
+                  <input type="text" defaultValue="30" className="w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm" />
+                  <span className="text-sm text-gray-700">days</span>
+                </div>
                 <p className="text-xs text-gray-600 mt-2">Days before late fee is applied</p>
               </div>
 
@@ -371,24 +374,24 @@ export default function BillingRulesConfiguration() {
         </div>
 
         {/* Discount Rules */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-pink-100 rounded-lg">
+              <div className="p-2 bg-pink-100 rounded-lg flex-shrink-0">
                 <Percent className="w-5 h-5 text-pink-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Discount Rules</h2>
-                <p className="text-xs text-gray-500">Manage promotional offers and discounts</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Discount Rules</h2>
+                <p className="text-xs sm:text-sm text-gray-500">Manage promotional offers and discounts</p>
               </div>
             </div>
-            <button className="px-4 py-2 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 flex items-center gap-2">
+            <button className="px-4 py-2 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 flex items-center gap-2 w-full sm:w-auto justify-center">
               <Plus className="w-4 h-4" />
               Add Discount
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="bg-purple-50 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <Percent className="w-6 h-6 text-purple-600" />
@@ -400,9 +403,9 @@ export default function BillingRulesConfiguration() {
               <p className="text-xs text-gray-600 mb-3">Age 65 and above</p>
               <p className="text-2xl font-bold text-purple-700">-15%</p>
               <p className="text-xs text-gray-600">discount</p>
-              <div className="flex gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row gap-2 mt-4">
                 <button className="flex-1 text-xs text-blue-600 hover:underline flex items-center justify-center gap-1"><Edit2 className="w-3 h-3" />Edit</button>
-                <button className="text-xs text-red-600 hover:underline flex items-center gap-1"><Trash2 className="w-3 h-3" />Delete</button>
+                <button className="flex-1 text-xs text-red-600 hover:underline flex items-center justify-center gap-1"><Trash2 className="w-3 h-3" />Delete</button>
               </div>
             </div>
 
@@ -417,9 +420,9 @@ export default function BillingRulesConfiguration() {
               <p className="text-xs text-gray-600 mb-3">3+ family members</p>
               <p className="text-2xl font-bold text-green-700">-20%</p>
               <p className="text-xs text-gray-600">discount</p>
-              <div className="flex gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row gap-2 mt-4">
                 <button className="flex-1 text-xs text-blue-600 hover:underline flex items-center justify-center gap-1"><Edit2 className="w-3 h-3" />Edit</button>
-                <button className="text-xs text-red-600 hover:underline flex items-center gap-1"><Trash2 className="w-3 h-3" />Delete</button>
+                <button className="flex-1 text-xs text-red-600 hover:underline flex items-center justify-center gap-1"><Trash2 className="w-3 h-3" />Delete</button>
               </div>
             </div>
 
@@ -434,9 +437,9 @@ export default function BillingRulesConfiguration() {
               <p className="text-xs text-gray-600 mb-3">Pay within 7 days</p>
               <p className="text-2xl font-bold text-blue-700">-5%</p>
               <p className="text-xs text-gray-600">discount</p>
-              <div className="flex gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row gap-2 mt-4">
                 <button className="flex-1 text-xs text-blue-600 hover:underline flex items-center justify-center gap-1"><Edit2 className="w-3 h-3" />Edit</button>
-                <button className="text-xs text-red-600 hover:underline flex items-center gap-1"><Trash2 className="w-3 h-3" />Delete</button>
+                <button className="flex-1 text-xs text-red-600 hover:underline flex items-center justify-center gap-1"><Trash2 className="w-3 h-3" />Delete</button>
               </div>
             </div>
           </div>
