@@ -1,7 +1,7 @@
 "use server";
 
 import connectToDb from "@/lib/connectToDb";
-import Patient from "@/models/patient.model";
+import User from "@/models/user.model";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
@@ -24,11 +24,11 @@ export async function checkSession() {
             return null;
         }
 
-        // Fetch patient info
-        const patient = await Patient.findById(payload.id).select("-password -otp -otpExpiry");
-        if (!patient) return null;
+        // Fetch user info
+        const user = await User.findById(payload.id).select("email, fullName");
+        if (!user) return null;
 
-        return { success: true, patient };
+        return { success: true, user };
     } catch (err) {
         console.error("❌ checkSession error:", err);
         return null;

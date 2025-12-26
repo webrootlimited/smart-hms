@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { loginPatient } from "@/actions/patient.actions";
+import { loginUser } from "@/actions/user-actions/user.actions";
 
 export default function LoginPage() {
 
@@ -25,14 +25,14 @@ export default function LoginPage() {
 
         setLoading(true);
 
-        const res = await loginPatient(email, password);
+        const res = await loginUser(email, password);
 
         setLoading(false);
 
-        if (!res.success && res.patientId) {
+        if (!res.success && res.userId) {
             toast.error("OTP is not verified, first verify your otp. Redirecting...");
 
-            router.push(`/otp-verify?id=${res.patientId}`);
+            router.push(`/otp-verify?id=${res.userId}`);
             return;
         }
 
@@ -42,7 +42,7 @@ export default function LoginPage() {
         }
 
         toast.success("Login successful!");
-        router.push("/patient/dashboard");
+        router.push(`${res.user.role}/dashboard`);
     };
 
 

@@ -18,9 +18,9 @@ import { useRouter } from "next/navigation";
 import maleImg from "@/assets/male.png";
 import femaleImg from "@/assets/female.png";
 import toast from "react-hot-toast";
-import { registerPatient } from "@/actions/patient.actions";
+import { registerUser } from "@/actions/user-actions/user.actions";
 
-export default function PatientSignup() {
+export default function UserSignup() {
     const router = useRouter();
 
     const [step, setStep] = useState(1);
@@ -75,7 +75,7 @@ export default function PatientSignup() {
         try {
             setLoading(true);
 
-            const res = await registerPatient({
+            const res = await registerUser({
                 fullName,
                 dob,
                 phoneNumber,

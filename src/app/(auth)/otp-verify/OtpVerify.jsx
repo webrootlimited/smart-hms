@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 // Placeholder server actions
-import { verifyOtp, resendOtp } from "@/actions/patient.actions";
+import { verifyOtp, resendOtp } from "@/actions/user-actions/user.actions";
 
 export default function OTPVerificationPage() {
     const router = useRouter();

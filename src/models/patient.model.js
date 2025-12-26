@@ -1,25 +1,29 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const PatientSchema = new mongoose.Schema(
-    {
-        fullName: { type: String, required: true },
-        dob: { type: Date, required: true },
-        phoneNumber: { type: String, required: true },
-        email: { type: String, required: true, unique: true },
-        password: { type: String, required: true },
-        isVerified: { type: Boolean, default: false },
-        otp: { type: String },
-        otpExpiry: { type: Date },
-        gender: { type: String, enum: ["Male", "Female", "Other"] },
-        address: { type: String },
-        profilePicture: { type: String },
-        bloodType: { type: String },
+const patientProfileSchema = new Schema({
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    patientId: { type: String, required: true, unique: true },
+    nhsNumber: { type: String },           // UK
+    ssnEncrypted: { type: String },        // US
+    insurance: {
+        provider: String,
+        plan: String,
+        memberId: String
     },
-    {
-        timestamps: true, // automatically adds createdAt and updatedAt
-    }
-);
+    primaryGP: String,
+    emergencyContact: {
+        name: String,
+        phone: String,
+        relation: String
+    },
+    address: {
+        line1: String,
+        city: String,
+        postcode: String,
+        country: String
+    },
+    preferredLanguage: String
+}, { timestamps: true });
 
-const Patient = mongoose.models.Patient || mongoose.model("Patient", PatientSchema);
-
-export default Patient;
+module.exports = mongoose.model('PatientProfile', patientProfileSchema);
