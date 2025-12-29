@@ -15,4 +15,4 @@ const providerProfileSchema = new Schema({
     locations: [{ type: Schema.Types.ObjectId, ref: 'Location' }]
 }, { timestamps: true });
 
-module.exports = mongoose.model('ProviderProfile', providerProfileSchema);
+module.exports = mongoose.models.ProviderProfile || mongoose.model('ProviderProfile', providerProfileSchema);

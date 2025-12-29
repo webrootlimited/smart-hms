@@ -1,6 +1,6 @@
 "use server";
 
-import connectToDb from "@/lib/connectToDb";
+import connectToDb from "@/lib/connectToDb.js";
 import User from "@/models/user.model";
 import bcrypt from "bcryptjs";
 import { sendOtpEmail } from "@/lib/mailer";
@@ -23,7 +23,7 @@ export async function registerUser(data) {
 
         // Generate OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+        const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
         const user = await User.create({
             fullName,
@@ -33,7 +33,7 @@ export async function registerUser(data) {
             password: hashedPassword,
             gender,
             otp,
-            otpExpiry,
+            otpExpiresAt,
             isVerified: false,
         });
 
@@ -51,8 +51,10 @@ export async function registerUser(data) {
 export async function verifyOtp(userId, otpInput) {
     try {
         await connectToDb();
-
+        console.log("userId", userId);
         const user = await User.findById(userId);
+        console.log(user);
+
         if (!user) throw new Error("User not found");
 
         if (user.isVerified) {
@@ -74,16 +76,16 @@ export async function verifyOtp(userId, otpInput) {
             return { success: true, message: "Already verified, JWT issued", userId: user._id };
         }
 
-        if (!user.otp || !user.otpExpiry) throw new Error("OTP not generated");
+        if (!user.otp || !user.otpExpiresAt) throw new Error("OTP not generated");
 
-        if (new Date() > user.otpExpiry) throw new Error("OTP expired");
+        if (new Date() > user.otpExpiresAt) throw new Error("OTP expired");
 
         if (otpInput !== user.otp) throw new Error("Invalid OTP");
 
         // Mark as verified
         user.isVerified = true;
         user.otp = null;
-        user.otpExpiry = null;
+        user.otpExpiresAt = null;
         await user.save();
 
         // Generate JWT token
@@ -122,10 +124,10 @@ export async function loginUser(email, password) {
         // Not verified -> send OTP
         if (!user.isVerified) {
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
-            const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+            const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
             user.otp = otp;
-            user.otpExpiry = otpExpiry;
+            user.otpExpiresAt = otpExpiresAt;
             await user.save();
 
             await sendOtpEmail(email, otp);
@@ -166,10 +168,10 @@ export async function resendOtp(userId) {
         if (user.isVerified) return { success: false, message: "Already verified" };
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+        const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
         user.otp = otp;
-        user.otpExpiry = otpExpiry;
+        user.otpExpiresAt = otpExpiresAt;
         await user.save();
 
         await sendOtpEmail(user.email, otp);

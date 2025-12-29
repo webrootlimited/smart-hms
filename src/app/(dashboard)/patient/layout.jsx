@@ -1,29 +1,74 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import toast from "react-hot-toast";
+
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { usePathname } from "next/navigation";
 import { checkSession } from "@/actions/checkSession";
+import FullPageLoader from "@/components/layout/FullPageLoader";
 
 export default function DashboardLayout({ children }) {
+    const router = useRouter();
     const pathname = usePathname();
 
-    // If route contains /telehealth → hide sidebar + header
-    const hideLayout = pathname?.includes("/telehealth") || pathname?.includes("/profile") || pathname?.includes("/messages") || pathname?.includes("/book-appointment") || pathname?.includes("/payments");
+    const [checking, setChecking] = useState(true);
+    const [authorized, setAuthorized] = useState(false);
+
+    useEffect(() => {
+        const verifySession = async () => {
+            try {
+                const user = await checkSession();
+                console.log(user);
+
+
+                if (!user) {
+                    toast.error("Please login to continue");
+                    router.replace("/login");
+                    return;
+                }
+
+                setAuthorized(true);
+            } catch (error) {
+                toast.error("Session expired. Please login again");
+                router.replace("/login");
+            } finally {
+                setChecking(false);
+            }
+        };
+
+        verifySession();
+    }, [router]);
+
+    // While checking session
+    if (checking) {
+        return <FullPageLoader />;
+    }
+
+    // Not authorized (redirect already triggered)
+    if (!authorized) {
+        return null;
+    }
+
+    // Hide layout for specific routes
+    const hideLayout =
+        pathname?.includes("/telehealth") ||
+        pathname?.includes("/profile") ||
+        pathname?.includes("/messages") ||
+        pathname?.includes("/book-appointment") ||
+        pathname?.includes("/payments");
 
     if (hideLayout) {
-        return <>{children}</>; // show ONLY page content
+        return <>{children}</>;
     }
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Fixed Sidebar */}
             <Sidebar />
 
-            {/* Main Content */}
             <div className="flex flex-col lg:pl-64 min-h-screen">
                 <Header />
-
                 <main className="flex-1 px-1 py-6">
                     {children}
                 </main>

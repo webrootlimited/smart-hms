@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { loginUser } from "@/actions/user-actions/user.actions";
+import { loginUser } from "@/actions/user.actions";
 
 export default function LoginPage() {
 

@@ -1,12 +1,12 @@
 export default function FullPageLoader() {
     return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-600">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
 
             {/* Spinner */}
-            <div className="h-16 w-16 animate-spin rounded-full border-4 border-white/30 border-t-white" />
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-indigo-600" />
 
             {/* Text */}
-            <p className="mt-4 text-sm font-medium tracking-wide text-white">
+            <p className="mt-4 text-sm font-medium text-gray-600">
                 Loading, please wait...
             </p>
 

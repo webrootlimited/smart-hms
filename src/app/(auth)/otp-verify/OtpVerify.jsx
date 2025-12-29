@@ -8,13 +8,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 // Placeholder server actions
-import { verifyOtp, resendOtp } from "@/actions/user-actions/user.actions";
+import { verifyOtp, resendOtp } from "@/actions/user.actions";
 
 export default function OTPVerificationPage() {
     const router = useRouter();
     const params = useSearchParams();
-    const patientId = params.get("id");
-    console.log(patientId);
+    const userId = params.get("id");
+    console.log(userId);
 
 
     const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -54,7 +54,7 @@ export default function OTPVerificationPage() {
         setLoading(true);
         try {
             const otp = code.join("");
-            const res = await verifyOtp(patientId, otp); // Replace with your server action
+            const res = await verifyOtp(userId, otp); // Replace with your server action
             if (!res.success) return toast.error(res.message || "OTP verification failed");
 
             toast.success("OTP verified successfully!");
@@ -70,7 +70,7 @@ export default function OTPVerificationPage() {
     const handleResend = async () => {
         setResendLoading(true);
         try {
-            const res = await resendOtp(patientId); // Replace with your server action
+            const res = await resendOtp(userId); // Replace with your server action
             if (!res.success) return toast.error(res.message || "Failed to resend OTP");
             toast.success("OTP resent successfully!");
         } catch (err) {

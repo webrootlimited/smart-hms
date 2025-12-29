@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import maleImg from "@/assets/male.png";
 import femaleImg from "@/assets/female.png";
 import toast from "react-hot-toast";
-import { registerUser } from "@/actions/user-actions/user.actions";
+import { registerUser } from "@/actions/user.actions";
 
 export default function UserSignup() {
     const router = useRouter();
@@ -91,7 +91,7 @@ export default function UserSignup() {
             }
 
             toast.success("Registration successful! Redirecting...");
-            router.push(`/otp-verify?id=${res.patientId}`);
+            router.push(`/otp-verify?id=${res.userId}`);
         } catch (err) {
             console.error(err);
             toast.error("Something went wrong");
@@ -240,16 +240,16 @@ export default function UserSignup() {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
                                 <div className="flex gap-6">
                                     <button
-                                        onClick={() => setGender("Male")}
-                                        className={`flex flex-col items-center w-1/2 rounded border-2 ${gender === "Male" ? "border-blue-500" : "border-gray-200"} p-2`}
+                                        onClick={() => setGender("male")}
+                                        className={`flex flex-col items-center w-1/2 rounded border-2 ${gender === "male" ? "border-blue-500" : "border-gray-200"} p-2`}
                                     >
                                         <Image src={maleImg} alt="Male" width={40} height={40} />
                                         <span className="text-xs font-medium">Male</span>
                                     </button>
 
                                     <button
-                                        onClick={() => setGender("Female")}
-                                        className={`flex flex-col items-center w-1/2 rounded border-2 ${gender === "Female" ? "border-pink-500" : "border-gray-200"} p-2`}
+                                        onClick={() => setGender("female")}
+                                        className={`flex flex-col items-center w-1/2 rounded border-2 ${gender === "female" ? "border-pink-500" : "border-gray-200"} p-2`}
                                     >
                                         <Image src={femaleImg} alt="Female" width={40} height={40} />
                                         <span className="text-xs font-medium">Female</span>

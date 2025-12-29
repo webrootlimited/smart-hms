@@ -9,4 +9,4 @@ const staffProfileSchema = new Schema({
     employmentType: { type: String, enum: ['full-time', 'part-time', 'contract'], default: 'full-time' }
 }, { timestamps: true });
 
-module.exports = mongoose.model('StaffProfile', staffProfileSchema);
+module.exports = mongoose.models.StaffProfile || mongoose.model('StaffProfile', staffProfileSchema);

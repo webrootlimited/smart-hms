@@ -26,4 +26,4 @@ const patientProfileSchema = new Schema({
     preferredLanguage: String
 }, { timestamps: true });
 
-module.exports = mongoose.model('PatientProfile', patientProfileSchema);
+module.exports = mongoose.models.PatientProfile || mongoose.model('PatientProfile', patientProfileSchema);

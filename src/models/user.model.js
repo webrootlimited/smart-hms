@@ -16,7 +16,7 @@ const userSchema = new Schema({
     profilePic: { type: String },
 
     // Roles (multi-role support)
-    roles: [{ type: String, enum: ROLES, default: "patient", required: true }],
+    roles: { type: String, enum: ROLES, default: "patient", required: true },
 
     status: { type: String, enum: ['active', "pending", "suspended", "deleted"], default: 'active' },
 
@@ -39,5 +39,5 @@ const userSchema = new Schema({
 
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);
 
