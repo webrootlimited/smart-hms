@@ -5,8 +5,10 @@ import OnlineDoctors from './OnlineDoctors';
 import DoctorSlots from './DoctorSlots';
 import ConsultationDetailsAndPayment from './ConsultationDetailsAndPayment';
 import PaymentSuccess from './PaymentSuccess';
+import { Suspense } from 'react';
 
-export default function Page() {
+
+function PageContent() {
     const searchParams = useSearchParams();
 
     const doctorId = searchParams.get('doctorId');
@@ -14,28 +16,46 @@ export default function Page() {
     const selectedSlot = searchParams.get('selectedSlot');
     const date = searchParams.get('date');
 
-    console.log(doctorId, tab, selectedSlot, date);
-
-    // STEP 1: No id → show doctors list
+    // STEP 1
     if (!doctorId || !tab) {
         return <OnlineDoctors />;
     }
 
-    // STEP 2: Select slot
+    // STEP 2
     if (tab === 'select-slots') {
         return <DoctorSlots doctorId={doctorId} />;
     }
 
-    // STEP 3: Consulation Details and Payment
+    // STEP 3
     if (tab === 'consultation-details' && selectedSlot && date) {
-        return <ConsultationDetailsAndPayment doctorId={doctorId} selectedSlot={selectedSlot} date={date} />;
+        return (
+            <ConsultationDetailsAndPayment
+                doctorId={doctorId}
+                selectedSlot={selectedSlot}
+                date={date}
+            />
+        );
     }
 
-    // STEP 4: Payment Success
+    // STEP 4
     if (tab === 'payment-success' && selectedSlot && date) {
-        return <PaymentSuccess doctorId={doctorId} selectedSlot={selectedSlot} date={date} />;
+        return (
+            <PaymentSuccess
+                doctorId={doctorId}
+                selectedSlot={selectedSlot}
+                date={date}
+            />
+        );
     }
 
-    // fallback
     return <OnlineDoctors />;
 }
+
+export default function Page() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <PageContent />
+        </Suspense>
+    );
+}
+
