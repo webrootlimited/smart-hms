@@ -15,9 +15,8 @@ const userSchema = new Schema({
     dob: { type: Date },
     profilePic: { type: String },
 
-    // Roles (multi-role support)
-    roles: { type: String, enum: ROLES, default: "patient", required: true },
-
+    // Roles
+    role: { type: String, enum: ROLES, default: "patient", required: true },
     status: { type: String, enum: ['active', "pending", "suspended", "deleted"], default: 'active' },
 
     // OTP fields
@@ -34,7 +33,7 @@ const userSchema = new Schema({
 
     // References to role-specific profiles
     patientProfile: { type: Schema.Types.ObjectId, ref: 'PatientProfile' },
-    providerProfile: { type: Schema.Types.ObjectId, ref: 'ProviderProfile' },
+    doctorProfile: { type: Schema.Types.ObjectId, ref: 'DoctorProfile' },
     staffProfile: { type: Schema.Types.ObjectId, ref: 'StaffProfile' },
 
 }, { timestamps: true });

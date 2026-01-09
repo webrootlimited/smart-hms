@@ -5,7 +5,7 @@ import usersImg from '@/assets/admin-dashboard/providers-header.png';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Header() {
+export default function Header({ doctors }) {
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:gap-12">
@@ -16,9 +16,9 @@ export default function Header() {
                             <Users className="w-6 h-6" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900">Providers</h2>
+                            <h2 className="text-xl font-semibold text-gray-900">Doctors</h2>
                             <p className="text-sm text-gray-500 mt-1">
-                                Manage all healthcare providers and their schedules
+                                Manage all healthcare doctors and their schedules
                             </p>
                         </div>
                     </div>
@@ -28,15 +28,15 @@ export default function Header() {
                         <div className="flex items-center gap-3">
                             <div className="w-3 h-3 bg-green-500 rounded-full flex-shrink-0"></div>
                             <div>
-                                <p className="text-xl font-semibold text-gray-900">24</p>
-                                <p className="text-sm text-gray-600">Active Providers</p>
+                                <p className="text-xl font-semibold text-gray-900">{doctors.length}</p>
+                                <p className="text-sm text-gray-600">Active Doctors</p>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-3">
                             <div className="w-3 h-3 bg-purple-500 rounded-full flex-shrink-0"></div>
                             <div>
-                                <p className="text-xl font-semibold text-gray-900">8</p>
+                                <p className="text-xl font-semibold text-gray-900">0</p>
                                 <p className="text-sm text-gray-600">Departments</p>
                             </div>
                         </div>
@@ -44,7 +44,7 @@ export default function Header() {
                         <div className="flex items-center gap-3">
                             <div className="w-3 h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
                             <div>
-                                <p className="text-xl font-semibold text-gray-900">156</p>
+                                <p className="text-xl font-semibold text-gray-900">0</p>
                                 <p className="text-sm text-gray-600">Slots Avaiable</p>
                             </div>
                         </div>
@@ -65,9 +65,9 @@ export default function Header() {
                     </div>
 
                     {/* Add New User Button */}
-                    <Link href="/admin/providers/add-new-provider" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-full shadow-lg flex items-center justify-center gap-2 transition-all hover:shadow-xl text-sm">
+                    <Link href="/admin/doctors/add-new-doctor" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-full shadow-lg flex items-center justify-center gap-2 transition-all hover:shadow-xl text-sm">
                         <UserPlus className="w-5 h-5" />
-                        <span>Add Provider</span>
+                        <span>Add Doctor</span>
                         <ChevronRight className="w-4 h-4" />
                     </Link>
                 </div>

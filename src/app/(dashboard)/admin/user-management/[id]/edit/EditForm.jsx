@@ -2,7 +2,7 @@
 
 import { Mail, Phone, User, Shield, MapPin, Building2, Lock, XCircle, CheckCircle, Activity, AlertTriangle } from 'lucide-react';
 
-export default function EditForm() {
+export default function EditForm({ user, userId }) {
     return (
         <div className="min-h-screen flex items-center justify-center">
             <div className="w-full space-y-4">
@@ -12,44 +12,44 @@ export default function EditForm() {
                         {/* Left Part */}
                         <div className="flex flex-col md:flex-row gap-4">
                             <div className="relative">
-                                <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
-                                    SJ
+                                <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
+                                    {user.fullName.slice(0, 2).toUpperCase()}
                                 </div>
-                                <button className="absolute top-15 -right-2 bg-white rounded-full p-1 shadow-md">
-                                    <User className="w-5 h-5 text-gray-600" />
+                                <button className="absolute top-8 -right-2 bg-white rounded-full p-1 shadow-md">
+                                    <User className="w-3 h-3 text-gray-600" />
                                 </button>
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">Dr. Sarah Johnson</h1>
-                                <p className="text-sm text-gray-600">sarah.johnson@hospital.com</p>
+                                <h1 className="text-2xl font-bold text-gray-900">{user.fullName}</h1>
+                                <p className="text-sm text-gray-600">{user.email}</p>
                                 <div className="flex flex-wrap items-center gap-2 mt-3">
                                     <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full flex items-center gap-1">
-                                        <User className="w-3 h-3" /> Doctor
+                                        <User className="w-3 h-3" /> {user.role}
                                     </span>
                                     <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full flex items-center gap-1">
-                                        <Building2 className="w-3 h-3" /> Cardiology
+                                        <Building2 className="w-3 h-3" /> {user.department}
                                     </span>
                                     <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                                        Active
+                                        {user.status}
                                     </span>
                                 </div>
 
                                 <div className="flex flex-wrap gap-4 mt-5">
                                     <div className="text-center bg-[linear-gradient(135deg,#EFF6FF_0%,#ECFEFF_100%)] px-4 py-2 rounded-lg">
                                         <p className="text-gray-500 text-sm">Joined</p>
-                                        <p className="font-medium text-sm">Jan 15, 2024</p>
+                                        <p className="font-medium text-sm">{user.createdAt.toString().slice(0, 10)}</p>
                                     </div>
                                     <div className="text-center bg-[linear-gradient(135deg,#EFF6FF_0%,#ECFEFF_100%)] px-4 py-2 rounded-lg">
                                         <p className="text-gray-500 text-sm">Last Login</p>
-                                        <p className="font-medium text-sm">2 hours ago</p>
+                                        <p className="font-medium text-sm">{user.lastLogin || "-"}</p>
                                     </div>
                                     <div className="text-center bg-[linear-gradient(135deg,#FAF5FF_0%,#FDF2F8_100%)] px-4 py-2 rounded-lg">
                                         <p className="text-gray-500 text-sm">Sessions</p>
-                                        <p className="font-medium text-sm">247 Total</p>
+                                        <p className="font-medium text-sm">{user.sessions || "-"}</p>
                                     </div>
                                     <div className="text-center bg-[linear-gradient(135deg,#FAF5FF_0%,#FDF2F8_100%)] px-4 py-2 rounded-lg">
                                         <p className="text-gray-500 text-sm">Location</p>
-                                        <p className="font-medium text-sm">Main Hospital</p>
+                                        <p className="font-medium text-sm">{user.location || "-"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -86,7 +86,7 @@ export default function EditForm() {
                                 <Mail className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                                 <input
                                     type="email"
-                                    value="sarah.johnson@hospital.com"
+                                    value={user.email}
                                     className="w-full pl-10 pr-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     readOnly
                                 />
@@ -101,7 +101,7 @@ export default function EditForm() {
                                 <Phone className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                                 <input
                                     type="tel"
-                                    value="+1 234 567 8901"
+                                    value={user.phoneNumber}
                                     className="w-full pl-10 pr-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
@@ -126,7 +126,7 @@ export default function EditForm() {
                             <div className="relative">
                                 <div className="absolute left-3 top-3 w-4 h-4 rounded-full border-2 border-gray-400" />
                                 <select className="w-full pl-10 pr-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-transparent">
-                                    <option>Doctor</option>
+                                    <option>{user.role}</option>
                                 </select>
                             </div>
                         </div>
@@ -246,7 +246,7 @@ export default function EditForm() {
                         </div>
                         <button className="w-full py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2">
                             <Mail className="w-4 h-4" />
-                            Send Reset Link
+                            Send Reset OTP
                         </button>
                     </div>
 

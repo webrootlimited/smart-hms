@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { Check, MapPin, Phone, Mail, Clock, Users, Stethoscope, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
-export default function ClinicAddedSuccess() {
+export default function ClinicAddedSuccess({ clinicData }) {
     return (
         <div className="min-h-screen flex items-center justify-center">
             <div className="w-full">
@@ -24,7 +25,7 @@ export default function ClinicAddedSuccess() {
                         is now live and available for appointments
                     </p>
                     <p className="text-md text-gray-400 mt-2">
-                        Clinic Code: <span className="font-mono font-semibold text-teal-400">CLN-R8383Y</span>
+                        Clinic Code: <span className="font-mono font-semibold text-teal-400">{clinicData.clinicCode}</span>
                     </p>
                 </div>
 
@@ -45,17 +46,17 @@ export default function ClinicAddedSuccess() {
                             <dl className="space-y-3 text-sm">
                                 <div>
                                     <dt className="text-gray-600">Clinic Name</dt>
-                                    <dd className="font-medium text-gray-900">Not specified</dd>
+                                    <dd className="font-medium text-gray-900">{clinicData.clinicName}</dd>
                                 </div>
                                 <div>
                                     <dt className="text-gray-600">Type</dt>
-                                    <dd className="font-medium text-gray-900">Hospital</dd>
+                                    <dd className="font-medium text-gray-900">{clinicData.clinicType}</dd>
                                 </div>
                                 <div>
                                     <dt className="text-gray-600">Status</dt>
                                     <dd>
                                         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            Active
+                                            {clinicData.status}
                                         </span>
                                     </dd>
                                 </div>
@@ -68,17 +69,17 @@ export default function ClinicAddedSuccess() {
                             <dl className="space-y-3 text-sm">
                                 <div>
                                     <dt className="text-gray-600">City</dt>
-                                    <dd className="font-medium text-gray-900">Lahore</dd>
+                                    <dd className="font-medium text-gray-900">{clinicData.city}</dd>
                                 </div>
                                 <div>
                                     <dt className="text-gray-600">Area</dt>
-                                    <dd className="font-medium text-gray-900">Not specified</dd>
+                                    <dd className="font-medium text-gray-900">{clinicData.area}</dd>
                                 </div>
                                 <div>
                                     <dt className="text-gray-600 flex items-center gap-1">
                                         <MapPin className="w-4 h-4" /> Coordinates
                                     </dt>
-                                    <dd className="font-medium text-gray-900">31.5204, 74.3587</dd>
+                                    <dd className="font-medium text-gray-900">{clinicData.latitude}, {clinicData.longitude}</dd>
                                 </div>
                             </dl>
                         </div>
@@ -91,13 +92,13 @@ export default function ClinicAddedSuccess() {
                                     <dt className="text-gray-600 flex items-center gap-1">
                                         <Phone className="w-4 h-4" /> Phone
                                     </dt>
-                                    <dd className="font-medium text-gray-900">Not provided</dd>
+                                    <dd className="font-medium text-gray-900">{clinicData.phoneNumber}</dd>
                                 </div>
                                 <div>
                                     <dt className="text-gray-600 flex items-center gap-1">
                                         <Mail className="w-4 h-4" /> Email
                                     </dt>
-                                    <dd className="font-medium text-gray-900">Not provided</dd>
+                                    <dd className="font-medium text-gray-900">{clinicData.email}</dd>
                                 </div>
                             </dl>
                         </div>
@@ -108,17 +109,17 @@ export default function ClinicAddedSuccess() {
                             <dl className="space-y-3 text-sm">
                                 <div>
                                     <dt className="text-gray-600">Facilities</dt>
-                                    <dd className="font-medium text-gray-900">1 facilities</dd>
+                                    <dd className="font-medium text-gray-900">{clinicData.facilities?.length}</dd>
                                 </div>
                                 <div>
                                     <dt className="text-gray-600">Services</dt>
-                                    <dd className="font-medium text-gray-900">1 services</dd>
+                                    <dd className="font-medium text-gray-900">{clinicData.services?.length}</dd>
                                 </div>
                                 <div>
                                     <dt className="text-gray-600 flex items-center gap-1">
                                         <Users className="w-4 h-4" /> Doctors
                                     </dt>
-                                    <dd className="font-medium text-gray-900">2 assigned</dd>
+                                    <dd className="font-medium text-gray-900">{clinicData.assignedDoctors?.length} assigned</dd>
                                 </div>
                             </dl>
                         </div>
@@ -139,7 +140,7 @@ export default function ClinicAddedSuccess() {
                                 key={day}
                                 className="px-5 py-3 text-sm font-medium text-gray-700 bg-teal-100 rounded-full"
                             >
-                                {day}: 09:00 - 13:00
+                                {day}: {clinicData.operatingHours[day].from} - {clinicData.operatingHours[day].to}
                             </span>
                         ))}
                     </div>
@@ -147,15 +148,15 @@ export default function ClinicAddedSuccess() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
-                    <button className="inline-flex items-center justify-center gap-3 px-8 py-2 text-base font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition">
+                    <Link href="/admin/clinic-settings" className="inline-flex cursor-pointer items-center justify-center gap-3 px-8 py-2 text-base font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-xl hover:bg-blue-600 hover:text-white transition">
                         <ArrowLeft className="w-5 h-5" />
                         Back to Clinic List
-                    </button>
+                    </Link>
 
-                    <button className="inline-flex items-center justify-center gap-3 px-10 py-2 text-base font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition shadow-lg">
+                    <Link href={`/admin/clinic-settings/${clinicData._id}`} className="inline-flex items-center justify-center gap-3 px-10 py-2 text-base font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition shadow-lg">
                         <Stethoscope className="w-6 h-6" />
                         View Clinic
-                    </button>
+                    </Link>
                 </div>
 
             </div>

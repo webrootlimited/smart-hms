@@ -1,14 +1,33 @@
 'use client';
 
-import img from "@/assets/admin-dashboard/clinic-header.png";
 import React from 'react';
 import { Building2, Users, TrendingUp, MapPin, Plus } from 'lucide-react';
 import Image from "next/image";
+import Link from "next/link";
+import img from "@/assets/admin-dashboard/clinic-header.png";
 
-export default function Header() {
+export default function Header({ clinics }) {
+    // Calculate real stats from clinics data
+    const activeLocations = clinics.filter(clinic => clinic.status === 'active').length;
+
+    const totalDoctors = clinics.reduce((sum, clinic) => {
+        return sum + (Array.isArray(clinic.assignedDoctors) ? clinic.assignedDoctors.length : 0);
+    }, 0);
+
+    // Unique cities (case-insensitive)
+    const uniqueCities = new Set(
+        clinics
+            .map(clinic => clinic.city?.trim())
+            .filter(city => city)
+            .map(city => city.toLowerCase())
+    ).size;
+
+    // Placeholder for monthly patients (replace with real data later if available)
+    const monthlyPatients = "0";
+
     return (
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-100">
-            <div className="max-w-7xl mx-auto">
+        <div>
+            <div>
                 <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-lg border border-white/50 overflow-hidden relative">
 
                     {/* Header Section */}
@@ -27,13 +46,13 @@ export default function Header() {
                             </div>
 
                             {/* Top Right: Add Location Button */}
-                            <button className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-xs sm:text-sm font-medium">
+                            <Link href="/admin/clinic-settings/clinic" className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-xs sm:text-sm font-medium">
                                 <Plus className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                                 Add Location
                                 <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
-                            </button>
+                            </Link>
                         </div>
                     </div>
 
@@ -50,33 +69,33 @@ export default function Header() {
                                             <Building2 className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                                         </div>
                                         <div>
-                                            <p className="text-lg sm:text-2xl font-bold">4</p>
+                                            <p className="text-lg sm:text-2xl font-bold">{activeLocations}</p>
                                             <p className="text-[8px] sm:text-[10px] opacity-90 leading-tight">Active Locations</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Total Staff */}
+                                {/* Total Doctors (from assignedDoctors) */}
                                 <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white px-4 sm:px-5 py-3 rounded-2xl shadow-md min-w-[110px] sm:min-w-28">
                                     <div className="flex items-center gap-2 sm:gap-3">
                                         <div className="p-1.5 bg-white/20 rounded-lg">
                                             <Users className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                                         </div>
                                         <div>
-                                            <p className="text-lg sm:text-2xl font-bold">124</p>
-                                            <p className="text-[8px] sm:text-[10px] opacity-90 leading-tight">Total Staff</p>
+                                            <p className="text-lg sm:text-2xl font-bold">{totalDoctors}</p>
+                                            <p className="text-[8px] sm:text-[10px] opacity-90 leading-tight">Total Doctors</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Monthly Patients */}
+                                {/* Monthly Patients (placeholder) */}
                                 <div className="bg-gradient-to-br from-purple-500 to-purple-700 text-white px-4 sm:px-5 py-3 rounded-2xl shadow-md min-w-[110px] sm:min-w-28">
                                     <div className="flex items-center gap-2 sm:gap-3">
                                         <div className="p-1.5 bg-white/20 rounded-lg">
                                             <TrendingUp className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                                         </div>
                                         <div>
-                                            <p className="text-lg sm:text-2xl font-bold">2.4K</p>
+                                            <p className="text-lg sm:text-2xl font-bold">{monthlyPatients}</p>
                                             <p className="text-[8px] sm:text-[10px] opacity-90 leading-tight">Monthly Patients</p>
                                         </div>
                                     </div>
@@ -89,7 +108,7 @@ export default function Header() {
                                             <MapPin className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                                         </div>
                                         <div>
-                                            <p className="text-lg sm:text-2xl font-bold">3</p>
+                                            <p className="text-lg sm:text-2xl font-bold">{uniqueCities}</p>
                                             <p className="text-[8px] sm:text-[10px] opacity-90 leading-tight">Cities Coverage</p>
                                         </div>
                                     </div>

@@ -36,13 +36,13 @@ export default function LoginPage() {
             return;
         }
 
-        if (!res.success) {
-            toast.error(res.message);
+        if (!res?.success) {
+            toast.error(res?.message);
             return;
         }
 
         toast.success("Login successful!");
-        router.push(`${res.user.role}/dashboard`);
+        router.push(`${res?.user?.role}/dashboard`);
     };
 
 
@@ -97,6 +97,7 @@ export default function LoginPage() {
                                 <input
                                     type="email"
                                     value={email}
+                                    autoComplete='email'
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder='Enter your email'
                                     className="w-full pl-9 pr-3 py-3 bg-gray-50 border border-gray-200 rounded-md text-xs

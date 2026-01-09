@@ -3,16 +3,60 @@
 import connectToDb from "@/lib/connectToDb.js";
 import User from "@/models/user.model";
 import bcrypt from "bcryptjs";
-import { sendOtpEmail } from "@/lib/mailer";
+import { sendOtpEmail, sendStaffInvitationEmail } from "@/lib/mailer";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import Staff from "@/models/staff.model";
+import Doctor from "@/models/doctor.model";
 
-// Register a new user
-export async function registerUser(data) {
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
+
+
+// HELPER FUNCTIONS 
+async function uploadImage(image) {
+    const file = image;
+
+    if (!file) {
+        return { error: 'No file uploaded' };
+    }
+
+    // Convert File to Buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // Save to /public/uploads (or any folder)
+    const filename = `${Date.now()}-${file.name}`;
+    const filepath = join(process.cwd(), 'public', 'uploads', filename);
+    await writeFile(filepath, buffer);
+
+    // Return URL for display/DB
+    return `/uploads/${filename}`;
+}
+
+function generateEmployeeId(role) {
+    const roleMap = {
+        doctor: "DOC",
+        receptionist: "REC",
+        nurse: "NUR",
+        billing_officer: "BIL"
+    };
+
+    const prefix = roleMap[role] || "EMP";
+    const randomStr = Math.random().toString(36).substr(2, 6).toUpperCase();
+
+    return `${prefix}-${randomStr}`;
+}
+
+
+// Register a new user - specific for patient and doctor registration
+export async function register(data) {
     try {
         await connectToDb();
 
-        const { fullName, dob, phoneNumber, email, password, gender } = data;
+        const { fullName, dob, phoneNumber, email, password, gender, role } = data;
+
+        if (role !== "patient" && role !== "doctor") throw new Error("Invalid role specified");
 
         // Check if user exists
         const existing = await User.findOne({ email });
@@ -34,6 +78,7 @@ export async function registerUser(data) {
             gender,
             otp,
             otpExpiresAt,
+            role,
             isVerified: false,
         });
 
@@ -41,6 +86,82 @@ export async function registerUser(data) {
         await sendOtpEmail(email, otp);
 
         return { success: true, message: "User registered. Please verify OTP.", userId: user._id };
+    } catch (err) {
+        console.error("❌ Register error:", err);
+        return { success: false, message: err.message || "Registration failed" };
+    }
+}
+
+// Register a new user - specific for other than patient roles - created by admin
+export async function registerUser(data, role) {
+    try {
+        await connectToDb();
+        console.log(data, role);
+
+        const { fullName, dob = null, phoneNumber, email, password, gender, profilePic = null, sendInvitation = false } = data;
+
+        // Check if user exists
+        const existing = await User.findOne({ email });
+        if (existing) throw new Error("Email already registered");
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        let roleRef = null;
+
+        // Create role-specific document
+        if (role === "receptionist" || role === "nurse" || role === "billing_officer") {
+            const staff = await Staff.create({ workLocation: data.workLocation, staffType: role, employeeId: generateEmployeeId(role) });
+            roleRef = staff._id;
+        } else if (role === "doctor") {
+            const doctor = await Doctor.create({
+                department: data.department,
+                employeeId: generateEmployeeId("doctor"),
+                schedule: data.schedule,
+                speciality: data.speciality,
+                startDate: data.startDate,
+                clinics: [data.workLocation],
+            });
+            console.log("doctor", doctor);
+            roleRef = doctor._id;
+        } else {
+            throw new Error("Invalid role specified");
+        }
+
+        let url = null;
+        if (profilePic) {
+            url = await uploadImage(profilePic);
+        }
+
+        // Create main user
+        const user = await User.create({
+            fullName,
+            profilePic: url,
+            dob,
+            phoneNumber,
+            email,
+            password: hashedPassword,
+            gender: gender.toLowerCase(),
+            role,
+            staffProfile: role !== "doctor" ? roleRef : undefined,
+            doctorProfile: role === "doctor" ? roleRef : undefined,
+        });
+        console.log("user", user);
+
+        if (sendInvitation) {
+            const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login`;
+
+            await sendStaffInvitationEmail(
+                email,
+                fullName,
+                role,
+                email,
+                password,
+                loginUrl
+            );
+        }
+
+        return { success: true, message: "User registered successfully.", userId: user._id };
     } catch (err) {
         console.error("❌ Register error:", err);
         return { success: false, message: err.message || "Registration failed" };
@@ -73,7 +194,7 @@ export async function verifyOtp(userId, otpInput) {
                 secure: process.env.NODE_ENV === "production",
             });
 
-            return { success: true, message: "Already verified, JWT issued", userId: user._id };
+            return { success: true, message: "Already verified, JWT issued", user: user };
         }
 
         if (!user.otp || !user.otpExpiresAt) throw new Error("OTP not generated");
@@ -103,7 +224,7 @@ export async function verifyOtp(userId, otpInput) {
             secure: process.env.NODE_ENV === "production",
         });
 
-        return { success: true, message: "OTP verified and logged in successfully", userId: user._id };
+        return { success: true, message: "OTP verified and logged in successfully", user: user };
     } catch (err) {
         console.error("❌ OTP verify error:", err.message);
         return { success: false, message: err.message || "OTP verification failed" };
@@ -151,7 +272,7 @@ export async function loginUser(email, password) {
             secure: process.env.NODE_ENV === "production",
         });
 
-        return { success: true, message: "Login successful", userId: user._id };
+        return { success: true, message: "Login successful", user: user };
     } catch (err) {
         console.error("❌ Login error:", err);
         return { success: false, message: err.message || "Login failed" };
@@ -182,3 +303,60 @@ export async function resendOtp(userId) {
         return { success: false, message: err.message || "Failed to resend OTP" };
     }
 }
+
+
+// Get all doctors
+export async function getDoctors() {
+    try {
+        await connectToDb();
+        const doctors = await User.find({ role: "doctor" }).populate("doctorProfile");
+        console.log(doctors);
+
+        return { success: true, doctors: JSON.parse(JSON.stringify(doctors)) };
+    } catch (err) {
+        console.error("❌ Get doctors error:", err);
+        return { success: false, message: err.message || "Failed to get doctors" };
+    }
+}
+
+// Get all users
+export async function getUsers() {
+    try {
+        await connectToDb();
+        const users = await User.find().sort({ createdAt: -1 }).populate("doctorProfile").populate("staffProfile").populate("patientProfile");
+        console.log(users);
+
+        return { success: true, users: JSON.parse(JSON.stringify(users)) };
+    } catch (err) {
+        console.error("❌ Get users error:", err);
+        return { success: false, message: err.message || "Failed to get users" };
+    }
+}
+
+// Get user details
+export async function getUserDetails(userId) {
+    try {
+        await connectToDb();
+        const user = await User.findById(userId).populate("doctorProfile").populate("staffProfile").populate("patientProfile");
+        console.log(user);
+
+        return { success: true, user: JSON.parse(JSON.stringify(user)) };
+    } catch (err) {
+        console.error("❌ Get user details error:", err);
+        return { success: false, message: err.message || "Failed to get user details" };
+    }
+}
+
+// Delete user
+export async function deleteUser(userId) {
+    try {
+        await connectToDb();
+        const user = await User.findByIdAndDelete(userId);
+
+        return { success: true };
+    } catch (err) {
+        console.error("❌ Delete user error:", err);
+        return { success: false, message: err.message || "Failed to delete user" };
+    }
+}
+

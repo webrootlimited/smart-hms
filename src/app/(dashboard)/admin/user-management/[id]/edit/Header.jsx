@@ -5,7 +5,8 @@ import { Users, UserPlus, ChevronRight, Settings, Activity, Lock, ClipboardList 
 import usersImg from '@/assets/admin-dashboard/edit-user.png';
 import Image from 'next/image';
 
-export default function Header() {
+export default function Header({ user, userid }) {
+
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:gap-12">

@@ -10,7 +10,8 @@ export async function checkSession() {
     try {
         await connectToDb();
 
-        const tokenCookie = cookies().get("token");
+        const cookieStore = await cookies();
+        const tokenCookie = cookieStore.get("token");
         if (!tokenCookie) return null;
 
         const token = tokenCookie.value;
@@ -25,10 +26,11 @@ export async function checkSession() {
         }
 
         // Fetch user info
-        const user = await User.findById(payload.id).select("email, fullName");
+        const user = await User.findById(payload.id).select("-password").populate("patientProfile").populate("doctorProfile").populate("staffProfile");
+
         if (!user) return null;
 
-        return { success: true, user };
+        return { success: true, user: JSON.parse(JSON.stringify(user)) };
     } catch (err) {
         console.error("❌ checkSession error:", err);
         return null;

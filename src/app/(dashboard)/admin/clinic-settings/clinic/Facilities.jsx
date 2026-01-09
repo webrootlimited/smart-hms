@@ -1,57 +1,57 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-    CarFront,
-    Accessibility,
-    Pill,
-    FlaskConical,
-    Users,
-    Siren,
-    Stethoscope,
-    Baby,
-    HeartPulse,
-    Activity,
-    BrainCircuit,
-    Info,
-    ArrowLeft,
-    ArrowRight
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { CarFront, Accessibility, Pill, FlaskConical, Users, Siren, Stethoscope, Baby, HeartPulse, Activity, BrainCircuit, Info, ArrowLeft, ArrowRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { saveClinicFacilitiesAndServices } from '@/actions/clinic.actions';
+import toast from 'react-hot-toast';
 
-export default function FacilitiesAndServices() {
-    const [selectedFacilities, setSelectedFacilities] = useState(['Waiting Area']);
-    const [selectedServices, setSelectedServices] = useState(['Pediatrics']);
+const facilities = [
+    { name: 'Parking', icon: CarFront },
+    { name: 'Wheelchair Access', icon: Accessibility },
+    { name: 'Pharmacy', icon: Pill },
+    { name: 'Laboratory', icon: FlaskConical },
+    { name: 'Waiting Area', icon: Users },
+    { name: 'Emergency Services', icon: Siren },
+];
 
-    const facilities = [
-        { name: 'Parking', icon: CarFront },
-        { name: 'Wheelchair Access', icon: Accessibility },
-        { name: 'Pharmacy', icon: Pill },
-        { name: 'Laboratory', icon: FlaskConical },
-        { name: 'Waiting Area', icon: Users },
-        { name: 'Emergency Services', icon: Siren },
-    ];
+const services = [
+    { name: 'General Consultation', icon: Stethoscope },
+    { name: 'Pediatrics', icon: Baby },
+    { name: 'Cardiology', icon: HeartPulse },
+    { name: 'Diagnostics', icon: Activity },
+    { name: 'Surgery', icon: Activity },
+    { name: 'Physiotherapy', icon: BrainCircuit },
+];
 
-    const services = [
-        { name: 'General Consultation', icon: Stethoscope },
-        { name: 'Pediatrics', icon: Baby },
-        { name: 'Cardiology', icon: HeartPulse },
-        { name: 'Diagnostics', icon: Activity },
-        { name: 'Surgery', icon: Activity },
-        { name: 'Physiotherapy', icon: BrainCircuit },
-    ];
+export default function FacilitiesAndServices({ onNext, onBack, clinicData }) {
+    const searchParams = useSearchParams();
+    const clinicId = searchParams.get('clinicId');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [selectedFacilities, setSelectedFacilities] = useState(["Waiting Area"]);
+    const [selectedServices, setSelectedServices] = useState(["General Consultation"]);
+
+    // Pre-select facilities and services from clinicData if available (edit mode)
+    useEffect(() => {
+        if (clinicData) {
+            if (Array.isArray(clinicData.facilities)) {
+                setSelectedFacilities(clinicData.facilities);
+            }
+            if (Array.isArray(clinicData.services)) {
+                setSelectedServices(clinicData.services);
+            }
+        }
+    }, []);
 
     const toggleSelection = (item, category) => {
         if (category === 'facilities') {
             setSelectedFacilities(prev =>
-                prev.includes(item)
-                    ? prev.filter(i => i !== item)
-                    : [...prev, item]
+                prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
             );
         } else {
             setSelectedServices(prev =>
-                prev.includes(item)
-                    ? prev.filter(i => i !== item)
-                    : [...prev, item]
+                prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
             );
         }
     };
@@ -60,10 +60,27 @@ export default function FacilitiesAndServices() {
         return category === 'facilities' ? selectedFacilities.length : selectedServices.length;
     };
 
-    return (
-        <div className="min-h-screen bg-gray-50 ">
-            <div className="space-y-8">
+    const handleSave = async () => {
+        console.log('Facilities & Services Data:', selectedFacilities, selectedServices);
 
+        try {
+            const res = await saveClinicFacilitiesAndServices(clinicId, selectedFacilities, selectedServices);
+            if (res.success) {
+                toast.success("Clinic facilities and services saved successfully.");
+                onNext(clinicId);
+            } else {
+                toast.error(res.message);
+            }
+        } catch (error) {
+            toast.error(error.message || "Something went wrong");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <div className="mx-auto space-y-8">
                 {/* Header Card */}
                 <div className="bg-purple-50 rounded-2xl border border-purple-200 p-6">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -85,19 +102,15 @@ export default function FacilitiesAndServices() {
                         </div>
                         <h2 className="text-base sm:text-lg font-medium text-gray-900">Facilities Available</h2>
                     </div>
-
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {facilities.map((facility) => {
                             const Icon = facility.icon;
                             const isSelected = selectedFacilities.includes(facility.name);
-
                             return (
                                 <button
                                     key={facility.name}
                                     onClick={() => toggleSelection(facility.name, 'facilities')}
-                                    className={`flex flex-col sm:flex-row items-center gap-4 px-5 py-5 sm:px-6 sm:py-4 rounded-2xl border transition-all text-left ${isSelected
-                                        ? 'bg-blue-50 border-blue-300 shadow-md'
-                                        : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                                    className={`flex flex-col sm:flex-row items-center gap-4 px-5 py-5 sm:px-6 sm:py-4 rounded-2xl border transition-all text-left cursor-pointer ${isSelected ? 'bg-blue-50 border-blue-300 shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
                                         }`}
                                 >
                                     <div className={`p-4 rounded-xl flex-shrink-0 ${isSelected ? 'bg-blue-100' : 'bg-gray-100'}`}>
@@ -128,19 +141,15 @@ export default function FacilitiesAndServices() {
                         </div>
                         <h2 className="text-base sm:text-lg font-medium text-gray-900">Medical Services Offered</h2>
                     </div>
-
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {services.map((service) => {
                             const Icon = service.icon;
                             const isSelected = selectedServices.includes(service.name);
-
                             return (
                                 <button
                                     key={service.name}
                                     onClick={() => toggleSelection(service.name, 'services')}
-                                    className={`flex flex-col sm:flex-row items-center gap-4 px-5 py-5 sm:px-6 sm:py-4 rounded-2xl border transition-all text-left ${isSelected
-                                        ? 'bg-green-50 border-green-300 shadow-md'
-                                        : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                                    className={`flex flex-col sm:flex-row items-center gap-4 px-5 py-5 sm:px-6 sm:py-4 rounded-2xl border transition-all text-left cursor-pointer ${isSelected ? 'bg-green-50 border-green-300 shadow-md' : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
                                         }`}
                                 >
                                     <div className={`p-4 rounded-xl flex-shrink-0 ${isSelected ? 'bg-green-100' : 'bg-gray-100'}`}>
@@ -175,7 +184,6 @@ export default function FacilitiesAndServices() {
                                 </p>
                             </div>
                         </div>
-
                         <div className="flex flex-wrap gap-3">
                             <span className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-full">
                                 {getSelectedCount('facilities')} Facilities
@@ -189,15 +197,33 @@ export default function FacilitiesAndServices() {
 
                 {/* Navigation Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center pt-6">
-                    <button className="inline-flex items-center justify-center gap-3 px-6 py-3.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                    <button
+                        onClick={() => onBack()}
+                        className="cursor-pointer inline-flex items-center justify-center gap-3 px-6 py-3.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                    >
                         <ArrowLeft className="w-5 h-5" />
                         Back
                     </button>
 
-                    <button className="inline-flex items-center justify-center gap-3 px-8 py-3.5 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition shadow-md">
-                        Save & Continue
-                        <ArrowRight className="w-5 h-5" />
-                    </button>
+                    <div className='flex gap-5'>
+                        {clinicData && (
+                            <button
+                                type="button"
+                                onClick={() => onNext(clinicData._id)}
+                                className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md text-sm font-medium flex items-center gap-2 hover:bg-gray-300 transition cursor-pointer"
+                            >
+                                Next
+                            </button>
+                        )}
+                        <button
+                            onClick={handleSave}
+                            disabled={isSubmitting}
+                            className="inline-flex items-center justify-center gap-3 px-8 py-3.5 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition shadow-md disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+                        >
+                            {isSubmitting ? 'Saving...' : 'Save & Continue'}
+                            <ArrowRight className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

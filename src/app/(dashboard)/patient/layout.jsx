@@ -19,18 +19,25 @@ export default function DashboardLayout({ children }) {
     useEffect(() => {
         const verifySession = async () => {
             try {
-                const user = await checkSession();
-                console.log(user);
+                const res = await checkSession();
+                console.log(res);
 
 
-                if (!user) {
+                if (!res.success) {
                     toast.error("Please login to continue");
                     router.replace("/login");
+                    return;
+                }
+                if (res?.user?.role !== "patient") {
+                    toast.error("Unauthorized access. You are being redirected to your dashboard");
+                    router.replace(`/${res?.user?.role}/dashboard`);
                     return;
                 }
 
                 setAuthorized(true);
             } catch (error) {
+                console.log(error);
+
                 toast.error("Session expired. Please login again");
                 router.replace("/login");
             } finally {

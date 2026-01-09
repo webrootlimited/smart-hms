@@ -29,9 +29,9 @@ const navLinks = [
         href: "/admin/appointments",
     },
     {
-        name: "Providers",
+        name: "Doctors",
         icon: Stethoscope,
-        href: "/admin/providers",
+        href: "/admin/doctors",
     },
     {
         name: "Patients",

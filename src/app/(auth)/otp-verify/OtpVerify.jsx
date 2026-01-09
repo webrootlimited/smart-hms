@@ -58,7 +58,7 @@ export default function OTPVerificationPage() {
             if (!res.success) return toast.error(res.message || "OTP verification failed");
 
             toast.success("OTP verified successfully!");
-            router.push("/patient/dashboard");
+            router.push(`/${res?.user?.role}/dashboard`);
         } catch (err) {
             toast.error("Something went wrong. Try again.");
         } finally {
@@ -95,7 +95,7 @@ export default function OTPVerificationPage() {
                     <div className="max-w-md w-full mx-auto">
                         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Enter Verification Code</h2>
                         <p className="text-sm text-[#64748B] text-left mb-8">
-                            We've sent a 6-digit code to your email****@example.com. Please check your inbox.
+                            We've sent a 6-digit code to your email. Please check your inbox.
                         </p>
 
                         {/* OTP Inputs */}
@@ -117,7 +117,6 @@ export default function OTPVerificationPage() {
                         </div>
 
                         <div className='flex justify-between mt-10'>
-                            {/* <p className='text-sm'>Resend OTP in <span className='text-[#0EA5E9CC]'>60 sec</span></p> */}
                             {/* Resend OTP */}
                             <button
                                 onClick={handleResend}

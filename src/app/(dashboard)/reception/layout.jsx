@@ -1,18 +1,72 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import toast from "react-hot-toast";
+
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { usePathname } from "next/navigation";
 import { checkSession } from "@/actions/checkSession";
+import FullPageLoader from "@/components/layout/FullPageLoader";
 
 export default function DashboardLayout({ children }) {
+    const router = useRouter();
     const pathname = usePathname();
 
-    // If route contains /telehealth → hide sidebar + header
-    const hideLayout = pathname?.includes("/telehealth") || pathname?.includes("/profile") || pathname?.includes("/messages") || pathname?.includes("/book-appointment") || pathname?.includes("/payments");
+    const [checking, setChecking] = useState(true);
+    const [authorized, setAuthorized] = useState(false);
+
+    useEffect(() => {
+        const verifySession = async () => {
+            try {
+                const res = await checkSession();
+
+                if (!res.success) {
+                    toast.error("Please login to continue");
+                    router.replace("/login");
+                    return;
+                }
+
+                // Restrict access to receptionist only
+                if (res?.user?.role !== "receptionist") {
+                    toast.error("Unauthorized access. You are being redirected to your dashboard");
+                    router.replace(`/${res?.user?.role}/dashboard`);
+                    return;
+                }
+
+                setAuthorized(true);
+            } catch (error) {
+                console.error(error);
+                toast.error("Session expired. Please login again");
+                router.replace("/login");
+            } finally {
+                setChecking(false);
+            }
+        };
+
+        verifySession();
+    }, [router]);
+
+    // Show loader while verifying session
+    if (checking) {
+        return <FullPageLoader />;
+    }
+
+    // If not authorized (redirect already triggered), render nothing
+    if (!authorized) {
+        return null;
+    }
+
+    // Hide sidebar and header on specific routes
+    const hideLayout =
+        pathname?.includes("/telehealth") ||
+        pathname?.includes("/profile") ||
+        pathname?.includes("/messages") ||
+        pathname?.includes("/book-appointment") ||
+        pathname?.includes("/payments");
 
     if (hideLayout) {
-        return <>{children}</>; // show ONLY page content
+        return <>{children}</>;
     }
 
     return (
