@@ -14,6 +14,9 @@ const userSchema = new Schema({
     gender: { type: String, enum: ['male', 'female', 'other'], required: true },
     dob: { type: Date },
     profilePic: { type: String },
+    emergencyContact: String,
+    address: String,
+
 
     // Roles
     role: { type: String, enum: ROLES, default: "patient", required: true },
@@ -23,6 +26,8 @@ const userSchema = new Schema({
     otp: { type: String },
     otpExpiresAt: { type: Date },
     isVerified: { type: Boolean, default: false },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
 
     // Verification & Security
     emailVerifiedAt: { type: Date },

@@ -12,16 +12,65 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-export async function sendOtpEmail(to, otp) {
+
+export async function sendOtpEmail(to, otp, role, expiry) {
+    const templatePath = path.join(
+        process.cwd(),
+        "src/lib/mail-templates/registration-otp-verify.ejs"
+    );
+
+    const html = await ejs.renderFile(templatePath, {
+        otp,
+        role,
+        expiresIn: expiry,
+    });
+
     const info = await transporter.sendMail({
         from: `"Smart HMS" <${process.env.SMTP_USER}>`,
         to,
-        subject: "Smart HMS - Your account verification OTP Code",
-        text: `Your OTP code is: ${otp}. It expires in 10 minutes.`,
-        html: `<p>Your OTP code is: <strong>${otp}</strong></p><p>Expires in 10 minutes</p>`,
+        subject: "Smart HMS – Account Verification OTP",
+        html,
+        text: `
+Your Smart HMS verification code is: ${otp}
+This OTP will expire at ${expiry}.
+
+If you did not request this, please ignore this email.
+        `,
     });
 
-    console.log("Message sent: %s", info.messageId);
+    console.log("OTP email sent:", info.messageId);
+    return info;
+}
+
+export async function sendResetPasswordEmail(to, role, resetLink, expiry) {
+    const templatePath = path.join(
+        process.cwd(),
+        "src/lib/mail-templates/reset-password.ejs"
+    );
+
+    const html = await ejs.renderFile(templatePath, {
+        role,
+        resetLink,
+        expiresIn: expiry,
+    });
+
+    const info = await transporter.sendMail({
+        from: `"Smart HMS" <${process.env.SMTP_USER}>`,
+        to,
+        subject: "Smart HMS – Reset Password",
+        html,
+        text: `
+Hello,
+
+You have requested to reset your password. Please use the following link to reset your password:
+${resetLink}
+This link will expire at ${expiry}.
+
+If you did not request this, please ignore this email.
+        `,
+    });
+
+    console.log("Reset password email sent:", info.messageId);
     return info;
 }
 

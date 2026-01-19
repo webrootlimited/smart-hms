@@ -2,54 +2,19 @@
 
 import connectToDb from "@/lib/connectToDb.js";
 import User from "@/models/user.model";
+import crypto from 'crypto';
 import bcrypt from "bcryptjs";
-import { sendOtpEmail, sendStaffInvitationEmail } from "@/lib/mailer";
+import { sendOtpEmail, sendStaffInvitationEmail, sendResetPasswordEmail } from "@/lib/mailer";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import Staff from "@/models/staff.model";
 import Doctor from "@/models/doctor.model";
+import Clinic from "@/models/clinic.model"
 
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
+import { uploadImage } from "@/lib/utils";
+import { generateEmployeeId } from "@/lib/utils";
 
-
-// HELPER FUNCTIONS 
-async function uploadImage(image) {
-    const file = image;
-
-    if (!file) {
-        return { error: 'No file uploaded' };
-    }
-
-    // Convert File to Buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Save to /public/uploads (or any folder)
-    const filename = `${Date.now()}-${file.name}`;
-    const filepath = join(process.cwd(), 'public', 'uploads', filename);
-    await writeFile(filepath, buffer);
-
-    // Return URL for display/DB
-    return `/uploads/${filename}`;
-}
-
-function generateEmployeeId(role) {
-    const roleMap = {
-        doctor: "DOC",
-        receptionist: "REC",
-        nurse: "NUR",
-        billing_officer: "BIL"
-    };
-
-    const prefix = roleMap[role] || "EMP";
-    const randomStr = Math.random().toString(36).substr(2, 6).toUpperCase();
-
-    return `${prefix}-${randomStr}`;
-}
-
-
-// Register a new user - specific for patient and doctor registration
+// Patient and Dcotor Registration
 export async function register(data) {
     try {
         await connectToDb();
@@ -83,7 +48,7 @@ export async function register(data) {
         });
 
         // Send OTP email
-        await sendOtpEmail(email, otp);
+        await sendOtpEmail(email, otp, role, otpExpiresAt.toLocaleString());
 
         return { success: true, message: "User registered. Please verify OTP.", userId: user._id };
     } catch (err) {
@@ -92,7 +57,7 @@ export async function register(data) {
     }
 }
 
-// Register a new user - specific for other than patient roles - created by admin
+// Registration for other than patient and doctor roles - created by admin
 export async function registerUser(data, role) {
     try {
         await connectToDb();
@@ -113,17 +78,6 @@ export async function registerUser(data, role) {
         if (role === "receptionist" || role === "nurse" || role === "billing_officer") {
             const staff = await Staff.create({ workLocation: data.workLocation, staffType: role, employeeId: generateEmployeeId(role) });
             roleRef = staff._id;
-        } else if (role === "doctor") {
-            const doctor = await Doctor.create({
-                department: data.department,
-                employeeId: generateEmployeeId("doctor"),
-                schedule: data.schedule,
-                speciality: data.speciality,
-                startDate: data.startDate,
-                clinics: [data.workLocation],
-            });
-            console.log("doctor", doctor);
-            roleRef = doctor._id;
         } else {
             throw new Error("Invalid role specified");
         }
@@ -144,7 +98,6 @@ export async function registerUser(data, role) {
             gender: gender.toLowerCase(),
             role,
             staffProfile: role !== "doctor" ? roleRef : undefined,
-            doctorProfile: role === "doctor" ? roleRef : undefined,
         });
         console.log("user", user);
 
@@ -242,6 +195,10 @@ export async function loginUser(email, password) {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) throw new Error("Invalid credentials");
 
+        if (user.status === "suspended") {
+            throw new Error("Your account has been suspended. Contact admin.");
+        }
+
         // Not verified -> send OTP
         if (!user.isVerified) {
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -251,7 +208,7 @@ export async function loginUser(email, password) {
             user.otpExpiresAt = otpExpiresAt;
             await user.save();
 
-            await sendOtpEmail(email, otp);
+            await sendOtpEmail(email, otp, user.role, otpExpiresAt.toLocaleString());
 
             return { success: false, message: "Please verify your OTP. OTP sent to email.", userId: user._id };
         }
@@ -259,6 +216,10 @@ export async function loginUser(email, password) {
         // Verified -> generate JWT
         const payload = { id: user._id, email: user.email };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || "7d" });
+
+        // 🔹 Update last login time
+        user.lastLoginAt = new Date();
+        await user.save({ validateBeforeSave: false });
 
         // Set cookie
         const cookieStore = await cookies();
@@ -309,7 +270,17 @@ export async function resendOtp(userId) {
 export async function getDoctors() {
     try {
         await connectToDb();
-        const doctors = await User.find({ role: "doctor" }).populate("doctorProfile");
+        const doctors = await User.find({ role: "doctor" }).populate({
+            path: "doctorProfile",
+            populate: {
+                path: "workLocations.clinic",
+                model: "Clinic",
+            },
+            populate: {
+                path: "assiatnts",
+                model: "User",
+            },
+        });
         console.log(doctors);
 
         return { success: true, doctors: JSON.parse(JSON.stringify(doctors)) };
@@ -323,7 +294,20 @@ export async function getDoctors() {
 export async function getUsers() {
     try {
         await connectToDb();
-        const users = await User.find().sort({ createdAt: -1 }).populate("doctorProfile").populate("staffProfile").populate("patientProfile");
+        const users = await User.find().sort({ createdAt: -1 }).populate({
+            path: "doctorProfile",
+            populate: {
+                path: "workLocations.clinic",
+                model: "Clinic",
+            },
+        })
+            .populate({
+                path: "staffProfile",
+                populate: {
+                    path: "workLocation.clinic",
+                },
+            })
+            .populate("patientProfile");
         console.log(users);
 
         return { success: true, users: JSON.parse(JSON.stringify(users)) };
@@ -337,7 +321,22 @@ export async function getUsers() {
 export async function getUserDetails(userId) {
     try {
         await connectToDb();
-        const user = await User.findById(userId).populate("doctorProfile").populate("staffProfile").populate("patientProfile");
+        const user = await User.findById(userId)
+            .populate({
+                path: "doctorProfile",
+                populate: {
+                    path: "workLocations.clinic",
+                    model: "Clinic",
+                },
+            })
+            .populate({
+                path: "staffProfile",
+                populate: {
+                    path: "workLocation.clinic",
+                },
+            })
+            .populate("patientProfile");
+
         console.log(user);
 
         return { success: true, user: JSON.parse(JSON.stringify(user)) };
@@ -351,12 +350,282 @@ export async function getUserDetails(userId) {
 export async function deleteUser(userId) {
     try {
         await connectToDb();
-        const user = await User.findByIdAndDelete(userId);
+        const user = await User.findByIdAndDelete(userId).populate({
+            path: "doctorProfile",
+            populate: {
+                path: "workLocations.clinic",
+                model: "Clinic",
+            },
+        })
+            .populate({
+                path: "staffProfile",
+                populate: {
+                    path: "workLocation.clinic",
+                },
+            })
+            .populate("patientProfile");
 
-        return { success: true };
+        return { success: true, user: JSON.parse(JSON.stringify(user)) };
     } catch (err) {
         console.error("❌ Delete user error:", err);
         return { success: false, message: err.message || "Failed to delete user" };
     }
 }
+
+// Deactivate user
+export async function deactivateUser(userId) {
+    try {
+        await connectToDb();
+
+        const user = await User.findById(userId).populate({
+            path: "doctorProfile",
+            populate: {
+                path: "workLocations.clinic",
+                model: "Clinic",
+            },
+        })
+            .populate({
+                path: "staffProfile",
+                populate: {
+                    path: "workLocation.clinic",
+                },
+            })
+            .populate("patientProfile");
+        if (!user) throw new Error("User not found");
+
+        user.status = "suspended";
+        await user.save();
+
+        return {
+            success: true,
+            message: "User account suspended successfully",
+            user: JSON.parse(JSON.stringify(user))
+        };
+    } catch (err) {
+        console.error("❌ Suspend error:", err);
+        return {
+            success: false,
+            message: err.message || "Failed to suspend user",
+        };
+    }
+}
+
+export async function activateUser(userId) {
+    try {
+        await connectToDb();
+
+        const user = await User.findById(userId).populate({
+            path: "doctorProfile",
+            populate: {
+                path: "workLocations.clinic",
+                model: "Clinic",
+            },
+        })
+            .populate({
+                path: "staffProfile",
+                populate: {
+                    path: "workLocation.clinic",
+                },
+            })
+            .populate("patientProfile");
+        if (!user) throw new Error("User not found");
+
+        user.status = "active";
+        await user.save();
+
+        return {
+            success: true,
+            message: "User account activated successfully",
+            user: JSON.parse(JSON.stringify(user))
+        };
+    } catch (err) {
+        console.error("❌ Activate error:", err);
+        return {
+            success: false,
+            message: err.message || "Failed to activate user",
+        };
+    }
+}
+
+// update user
+export async function updateStaff(userId, formData) {
+    try {
+        await connectToDb();
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return { success: false, message: "User not found" };
+        }
+
+        // Only allow updates for these roles via this action
+        const allowedStaffRoles = ["nurse", "receptionist", "billing_officer"];
+        if (!allowedStaffRoles.includes(user.role?.toLowerCase())) {
+            return {
+                success: false,
+                message: "This action is only for Nurse, Receptionist and Billing Officer roles"
+            };
+        }
+
+        // ── Extract form fields ───────────────────────────────────────
+        const fullName = formData.get("fullName")?.trim();
+        const phoneNumber = formData.get("phoneNumber")?.trim();
+        const role = formData.get("role")?.trim();
+        const clinicId = formData.get("clinicId");
+        const status = formData.get("status"); // "active" | "pending" | "suspended"
+        const departments = formData.getAll("departments[]");
+        const profilePic = formData.get("profilePic");
+
+        // Basic validation
+        if (!fullName || !phoneNumber) {
+            return { success: false, message: "Full name and phone number are required" };
+        }
+
+        // Optional: prevent role change (recommended for stability)
+        if (role && role.toLowerCase() !== user.role?.toLowerCase()) {
+            return {
+                success: false,
+                message: "Role cannot be changed through this action. Contact system administrator."
+            };
+        }
+
+        // Prepare user updates
+        const userUpdate = {
+            fullName: fullName || user.fullName,
+            phoneNumber: phoneNumber || user.phoneNumber,
+            status: status || user.status,
+        };
+
+        // Profile picture
+        if (profilePic && profilePic.size > 0) {
+            const newImageUrl = await uploadImage(profilePic);
+            if (newImageUrl) {
+                userUpdate.profilePic = newImageUrl;
+            }
+        }
+
+        // ── Update Staff profile (only for allowed roles) ───────────────
+        if (user.staffProfile) {
+            const staffUpdate = {};
+
+            if (clinicId) {
+                staffUpdate["workLocation.clinic"] = clinicId;
+            }
+
+            if (Array.isArray(departments) && departments.length > 0) {
+                staffUpdate["workLocation.departments"] = departments;
+            }
+
+            if (Object.keys(staffUpdate).length > 0) {
+                await Staff.findByIdAndUpdate(user.staffProfile, {
+                    $set: staffUpdate
+                }, { new: true });
+            }
+        }
+
+        // Final user update
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: userUpdate },
+            { new: true, runValidators: true }
+        );
+
+        return {
+            success: true,
+            message: "Staff profile updated successfully",
+            user: JSON.parse(JSON.stringify(updatedUser))
+        };
+
+    } catch (error) {
+        console.error("updateStaff error:", error);
+        return {
+            success: false,
+            message: error.message || "Failed to update staff profile"
+        };
+    }
+}
+
+// Send Reset password mail to speciifc role - by admin
+export async function requestPasswordReset(email) {
+    try {
+        if (!email) {
+            throw new Error('Email is required');
+        }
+
+        // Find user
+        const user = await User.findOne({ email });
+        if (!user) {
+            return {
+                success: true,
+                message: 'If an account exists, a reset link has been sent',
+            };
+        }
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const hashedToken = await bcrypt.hash(resetToken, 10);
+        const expiresAt = Date.now() + 15 * 60 * 1000;
+
+        // Save token & expiry in DB
+        user.resetPasswordToken = hashedToken;
+        user.resetPasswordExpires = expiresAt;
+        await user.save();
+
+        const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}&email=${email}`;
+
+        await sendResetPasswordEmail(
+            user.email,
+            user.role || 'User',
+            resetLink,
+            new Date(expiresAt).toLocaleString()
+        );
+
+        return {
+            success: true,
+            message: 'If an account exists, a reset link has been sent',
+        };
+    } catch (error) {
+        console.error('requestPasswordReset error:', error);
+
+        return {
+            success: false,
+            message: 'Failed to process password reset request',
+        };
+    }
+}
+
+// Update Password Using Token
+export async function updatePassword(userId, token, newPassword) {
+    try {
+        const user = await User.findById(userId);
+        if (!user) throw new Error('User not found');
+
+        if (!user.resetPasswordToken || !user.resetPasswordExpires) {
+            throw new Error('No reset request found');
+        }
+
+        if (user.resetPasswordExpires < Date.now()) {
+            throw new Error('Reset token has expired');
+        }
+
+        const isTokenValid = await bcrypt.compare(token, user.resetPasswordToken);
+        if (!isTokenValid) {
+            throw new Error('Invalid reset token');
+        }
+
+        // Update password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+
+        // Clear reset token and expiry
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+
+        await user.save();
+
+        return { success: true, message: 'Password updated successfully' };
+    } catch (err) {
+        console.error('updatePassword error:', err);
+        return { success: false, message: err.message || 'Failed to update password' };
+    }
+}
+
 

@@ -54,7 +54,7 @@ const Page = () => {
     return (
         <div className="px-4 space-y-10">
             <Header doctors={doctors} />
-            <DoctorsTable doctors={doctors} />
+            <DoctorsTable doctors={doctors} setDoctors={setDoctors} />
         </div>
     );
 };

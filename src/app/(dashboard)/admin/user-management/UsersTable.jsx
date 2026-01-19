@@ -147,7 +147,7 @@ export default function AllUsersTable({ users, setUsers }) {
 
                                         <td className="py-4">
                                             <span className="text-sm text-gray-600">
-                                                {user.lastLogin || 'Never'}
+                                                {user.lastLoginAt?.toString().slice(0, 10) || 'Never'}
                                             </span>
                                         </td>
 

@@ -28,7 +28,7 @@ export default function Header({ doctors }) {
                         <div className="flex items-center gap-3">
                             <div className="w-3 h-3 bg-green-500 rounded-full flex-shrink-0"></div>
                             <div>
-                                <p className="text-xl font-semibold text-gray-900">{doctors.length}</p>
+                                <p className="text-xl font-semibold text-gray-900">{doctors.filter((doc) => doc.status === 'active').length}</p>
                                 <p className="text-sm text-gray-600">Active Doctors</p>
                             </div>
                         </div>

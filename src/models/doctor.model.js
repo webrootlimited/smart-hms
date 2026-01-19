@@ -1,77 +1,96 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const daySchema = {
-    open: { type: Boolean, default: false },
-    from: { type: String, default: "" },
-    to: { type: String, default: "" },
-    break: {
-        from: { type: String, default: "" },
-        to: { type: String, default: "" }
-    }
-};
-
 const doctorProfileSchema = new Schema(
     {
         providerType: {
             type: String,
             enum: ['doctor', 'therapist'],
-            default: "doctor",
-            required: true
+            default: 'doctor',
         },
 
-        /* BASIC LICENSE (Country Based) */
-        license: {
-            number: { type: String },
-            country: { type: String }
-        },
+        yearsOfExperience: Number,
+        consultationFee: Number,
+        bio: String,
+        employmentStatus: { type: String, enum: ['Full-time', 'Part-time', 'Contract'], default: 'Full-time' },
 
-        /* ✅ CERTIFICATIONS */
-        certifications: {
-            type: [
-                {
-                    title: { type: String, required: true },
-                    organization: { type: String },
-                    issuedDate: { type: Date },
-                    expiryDate: { type: Date },
-                    status: {
-                        type: String,
-                        enum: ['Active', 'Expired'],
-                        default: 'Active'
-                    },
-                    documentUrl: { type: String }
-                }
-            ],
-            default: []
-        },
 
-        /* ✅ MEDICAL LICENSE */
+        assistants: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'Staff'
+            }
+        ],
+
+        /* Medical License */
         medicalLicense: {
-            licenseNumber: { type: String },
-            status: {
-                type: String,
-                enum: ['Active', 'Inactive', 'Suspended'],
-                default: 'Active'
-            },
-            verified: { type: Boolean, default: false },
-            expiryDate: { type: Date }
+            licenseNumber: String,
+            status: { type: String, enum: ['Active', 'Suspended', 'Pending'] },
+            expiryDate: Date,
+            issuedAt: Date,
+            documentUrl: String
         },
 
-        /* ✅ DEA CERTIFICATE */
+        /* Certifications (Includes Board Certifications) */
+        certifications: [
+            {
+                type: {
+                    type: String,
+                    enum: ['Board', 'Certification'],
+                    required: true
+                },
+
+                title: String,            // e.g. Cardiology, Internal Medicine
+                organization: String,     // e.g. PMC, ABIM, CPSP (Board / Issuer)
+                licenseNumber: String,    // mainly for Board certifications
+
+                status: {
+                    type: String,
+                    enum: ['Active', 'Suspended', 'Expired', 'Pending'],
+                },
+
+                issuedAt: Date,
+                expiryDate: Date,
+
+                documentUrl: String
+            }
+        ],
+
+
+        /* DEA Certificate */
         deaCertificate: {
-            deaNumber: { type: String },
-            status: {
-                type: String,
-                enum: ['Valid', 'Expired'],
-                default: 'Valid'
-            },
-            expiryDate: { type: Date }
+            deaNumber: String,
+            status: { type: String, enum: ['Active', 'Expired', 'Pending'] },
+            expiryDate: Date,
+            issuedAt: Date,
+            documentUrl: String
         },
 
-        specialities: {
-            type: [String],
-            required: true
+        /* Malpractice Insurance Certificate */
+        malpracticeInsuranceCertificate: {
+            policyNumber: String,
+
+            insuranceProvider: String, // e.g. Allianz, AXA, State Life
+
+            coverageAmount: String, // e.g. "$1M per claim" or "PKR 10 Million"
+
+            status: {
+                type: String,
+                enum: ['Active', 'Expired', 'Pending'],
+            },
+
+            issuedAt: Date,
+            expiryDate: Date,
+
+            documentUrl: String
         },
+
+
+        digitalSignature: {
+            documentUrl: String
+        },
+
+        specialities: [String],
 
         telehealthEnabled: {
             type: Boolean,
@@ -84,22 +103,9 @@ const doctorProfileSchema = new Schema(
             unique: true
         },
 
-        startDate: {
-            type: Date,
-            required: true
-        },
+        startDate: Date,
 
-        /* WORK SCHEDULE */
-        schedule: {
-            Monday: daySchema,
-            Tuesday: daySchema,
-            Wednesday: daySchema,
-            Thursday: daySchema,
-            Friday: daySchema,
-            Saturday: daySchema,
-            Sunday: daySchema
-        },
-
+        /* ✅ LOCATION-BASED SCHEDULE (EMBEDDED) */
         workLocations: {
             type: [
                 {
@@ -108,18 +114,47 @@ const doctorProfileSchema = new Schema(
                         ref: 'Clinic',
                         required: true
                     },
+
                     department: {
                         type: String,
                         default: ""
                     },
-                    workingDays: {
-                        type: [String],
-                        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+
+                    schedule: {
+                        type: [
+                            {
+                                day: {
+                                    type: String,
+                                    enum: [
+                                        'Monday',
+                                        'Tuesday',
+                                        'Wednesday',
+                                        'Thursday',
+                                        'Friday',
+                                        'Saturday',
+                                        'Sunday'
+                                    ],
+                                    required: true
+                                },
+                                open: { type: Boolean, default: false },
+                                from: { type: String, default: "" },
+                                to: { type: String, default: "" },
+                                break: {
+                                    from: { type: String, default: "" },
+                                    to: { type: String, default: "" }
+                                }
+                            }
+                        ],
                         default: []
                     }
                 }
             ],
             default: []
+        },
+
+        slotDuration: {
+            type: Number,
+            default: 15
         },
 
         patients: {

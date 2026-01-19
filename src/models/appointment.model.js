@@ -10,7 +10,7 @@ const appointmentSchema = new mongoose.Schema(
             index: true,
         },
 
-        providerId: {
+        doctorId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Provider",
         },

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Header from './Header';
 import EditForm from './EditForm';
 import { getUserDetails, getUsers } from '@/actions/user.actions';
 import Loader from '@/components/layout/Loader';
@@ -61,7 +60,6 @@ export default function Page() {
 
     return (
         <div className="px-4 space-y-10">
-            <Header user={user} userId={userId} />
             <EditForm user={user} userId={userId} />
         </div>
     );

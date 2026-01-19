@@ -20,9 +20,9 @@ const staffProfileSchema = new Schema({
             ref: 'Clinic',
             required: true
         },
-        departments: {
-            type: [String],
-            default: []
+        department: {
+            type: String,
+            default: ""
         }
     },
 
@@ -54,7 +54,7 @@ const staffProfileSchema = new Schema({
         canAdministerMedication: Boolean
     },
 
-    billingDetails: {
+    billingOfficerDetails: {
         canHandleInsurance: Boolean,
         maxDiscountAllowed: Number
     },

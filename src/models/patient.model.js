@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const patientProfileSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     patientId: { type: String, required: true, unique: true },
     nhsNumber: { type: String },           // UK
     ssnEncrypted: { type: String },        // US
