@@ -387,6 +387,7 @@ export async function updateDoctorCredentials(id, credentials) {
     }
 }
 
+// update asssitants
 export async function updateDoctorAssistants(userId, assistants = []) {
     try {
         await connectToDb();
@@ -422,7 +423,7 @@ export async function updateDoctorAssistants(userId, assistants = []) {
         return {
             success: true,
             doctorId: doctor._id.toString(),
-            assistants: doctor.assistants,
+            assistants: JSON.parse(JSON.stringify(doctor.assistants)),
             message: 'Doctor assistants updated successfully',
         };
     } catch (error) {
@@ -434,3 +435,45 @@ export async function updateDoctorAssistants(userId, assistants = []) {
         };
     }
 }
+
+// remove assistant
+export async function deleteDoctorAssistant(userId, assistantId) {
+    try {
+        await connectToDb();
+
+        if (!userId) throw new Error("User ID is required");
+        if (!assistantId) throw new Error("Assistant ID is required");
+
+        // 🔹 Find user
+        const user = await User.findById(userId);
+        if (!user) throw new Error("User not found");
+
+        if (!user.doctorProfile) {
+            throw new Error("Doctor profile not found");
+        }
+
+        // 🔹 Pull assistant from array
+        const doctor = await Doctor.findByIdAndUpdate(
+            user.doctorProfile,
+            { $pull: { assistants: assistantId } },
+            { new: true }
+        );
+
+        if (!doctor) throw new Error("Doctor not found");
+
+        return {
+            success: true,
+            doctorId: doctor._id.toString(),
+            assistants: JSON.parse(JSON.stringify(doctor.assistants)),
+            message: "Assistant removed successfully",
+        };
+    } catch (error) {
+        console.error("❌ Delete doctor assistant error:", error);
+
+        return {
+            success: false,
+            message: error.message || "Failed to remove assistant",
+        };
+    }
+}
+

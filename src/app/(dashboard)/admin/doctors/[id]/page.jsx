@@ -61,6 +61,7 @@ const DoctorDetailPage = () => {
             try {
                 const response = await getUserDetails(id);
                 if (response?.success && response.user) {
+                    console.log(response.user);
                     setUserData(response.user);
                 } else {
                     setError(response?.error || 'Failed to load doctor details.');

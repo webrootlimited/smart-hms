@@ -272,15 +272,18 @@ export async function getDoctors() {
         await connectToDb();
         const doctors = await User.find({ role: "doctor" }).populate({
             path: "doctorProfile",
-            populate: {
-                path: "workLocations.clinic",
-                model: "Clinic",
-            },
-            populate: {
-                path: "assiatnts",
-                model: "User",
-            },
+            populate: [
+                {
+                    path: "workLocations.clinic",
+                    model: "Clinic",
+                },
+                {
+                    path: "assistants",
+                    model: "User",
+                },
+            ],
         });
+
         console.log(doctors);
 
         return { success: true, doctors: JSON.parse(JSON.stringify(doctors)) };
@@ -324,10 +327,16 @@ export async function getUserDetails(userId) {
         const user = await User.findById(userId)
             .populate({
                 path: "doctorProfile",
-                populate: {
-                    path: "workLocations.clinic",
-                    model: "Clinic",
-                },
+                populate: [
+                    {
+                        path: "workLocations.clinic",
+                        model: "Clinic",
+                    },
+                    {
+                        path: "assistants",
+                        model: "User",
+                    }
+                ],
             })
             .populate({
                 path: "staffProfile",

@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import {
     GraduationCap,
@@ -86,13 +85,68 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
     const [credentials, setCredentials] = useState(initialCredentials);
     const [errors, setErrors] = useState({});
 
+    // ── Helper functions to determine if we should show a section in view mode ──
+    const hasMedicalLicense = () => {
+        const lic = credentials.medicalLicense;
+        return (
+            lic?.licenseNumber?.trim() ||
+            lic?.documentUrl ||
+            lic?.issuedAt ||
+            lic?.expiryDate
+        );
+    };
+
+    const hasAnyCertification = () => {
+        return credentials.certifications.some(cert =>
+            cert?.title?.trim() ||
+            cert?.organization?.trim() ||
+            cert?.documentUrl ||
+            cert?.issuedAt ||
+            cert?.expiryDate
+        );
+    };
+
+    const hasDEACertificate = () => {
+        const dea = credentials.deaCertificate;
+        return (
+            dea?.deaNumber?.trim() ||
+            dea?.documentUrl ||
+            dea?.issuedAt ||
+            dea?.expiryDate
+        );
+    };
+
+    const hasMalpracticeInsurance = () => {
+        const mal = credentials.malpracticeInsuranceCertificate;
+        return (
+            mal?.policyNumber?.trim() ||
+            mal?.insuranceProvider?.trim() ||
+            mal?.coverageAmount?.trim() ||
+            mal?.documentUrl ||
+            mal?.issuedAt ||
+            mal?.expiryDate
+        );
+    };
+
+    const hasDigitalSignature = () => {
+        return !!credentials.digitalSignature?.documentUrl;
+    };
+
+    const hasAnyCredentials = () => {
+        return (
+            hasMedicalLicense() ||
+            hasAnyCertification() ||
+            hasDEACertificate() ||
+            hasMalpracticeInsurance() ||
+            hasDigitalSignature()
+        );
+    };
+
     // Pre-fill from existing data (doctorProfile)
     useEffect(() => {
         if (!userData?.doctorProfile) return;
-
         const profile = userData.doctorProfile;
         const updated = JSON.parse(JSON.stringify(initialCredentials));
-
         const formatDate = (dateStr) => (dateStr ? new Date(dateStr).toISOString().split('T')[0] : '');
 
         // Medical License
@@ -169,7 +223,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
             previews.malpracticeInsuranceCertificate = updated.malpracticeInsuranceCertificate.documentUrl;
         }
         if (updated.digitalSignature.documentUrl) previews.digitalSignature = updated.digitalSignature.documentUrl;
-
         setPreviewUrls(previews);
     }, [userData]);
 
@@ -216,7 +269,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
     const handleFileChange = (key, e, index = -1) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
         if (file.size > 5 * 1024 * 1024) {
             toast.error('File size must be less than 5MB');
             return;
@@ -225,7 +277,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
             toast.error('Only PDF, JPG, PNG allowed');
             return;
         }
-
         if (file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = () => {
@@ -234,7 +285,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
             };
             reader.readAsDataURL(file);
         }
-
         if (key === 'certifications') {
             setCredentials((prev) => {
                 const certs = [...prev.certifications];
@@ -266,7 +316,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
 
     const validate = () => {
         const newErrors = {};
-
         // Medical License (required)
         if (!credentials.medicalLicense.file && !credentials.medicalLicense.documentUrl) {
             newErrors.medicalLicense_file = 'Medical license document required';
@@ -277,7 +326,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
         if (!credentials.medicalLicense.expiryDate) {
             newErrors.medicalLicense_expiry = 'Expiry date required';
         }
-
         // At least one valid certification
         let hasValidCert = false;
         credentials.certifications.forEach((cert, i) => {
@@ -287,7 +335,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                 if (!cert.title?.trim()) newErrors[`cert_${i}_title`] = 'Title required';
                 if (!cert.organization?.trim()) newErrors[`cert_${i}_org`] = 'Organization required';
                 if (!cert.issuedAt) newErrors[`cert_${i}_issued`] = 'Issue date required';
-
                 if ((cert.file || cert.documentUrl) && cert.title?.trim() && cert.organization?.trim()) {
                     hasValidCert = true;
                 }
@@ -296,7 +343,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
         if (!hasValidCert) {
             newErrors.certifications = 'At least one complete certification required';
         }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -306,9 +352,7 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
             toast.error('Please fix the required fields');
             return;
         }
-
         setIsSubmitting(true);
-
         const payload = {
             medicalLicense: {
                 licenseNumber: credentials.medicalLicense.licenseNumber.trim(),
@@ -357,7 +401,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                 ? { file: credentials.digitalSignature.file }
                 : undefined,
         };
-
         try {
             const res = await updateDoctorCredentials(userData._id, payload);
             if (res.success) {
@@ -402,16 +445,15 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
             <div className="max-w-7xl mx-auto space-y-6">
                 {isEditMode ? (
                     // ── EDIT MODE ───────────────────────────────────────────────────────────────
+                    // (unchanged – as requested)
                     <div className="bg-white rounded-xl shadow p-5 md:p-6">
                         <div className="flex items-center mb-6">
                             <FileText className="h-6 w-6 text-indigo-600 mr-2" />
                             <h2 className="text-2xl font-bold text-gray-800">Credentials & Documents</h2>
                         </div>
-
                         <p className="text-gray-600 mb-8">
                             Medical License and at least one Board Certification are required. Others are optional.
                         </p>
-
                         <div className="space-y-8">
                             {/* Medical License */}
                             <section className="border border-gray-200 rounded-xl p-6 bg-gray-50">
@@ -424,7 +466,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                         <p className="text-sm text-gray-600 mt-1">PMC / equivalent current license</p>
                                     </div>
                                 </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">License Number *</label>
@@ -467,7 +508,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                         </select>
                                     </div>
                                 </div>
-
                                 <div className="mt-6 relative">
                                     <div
                                         className={`border-2 border-dashed rounded-xl text-center cursor-pointer min-h-[160px] flex items-center justify-center
@@ -485,7 +525,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                             credentials.medicalLicense.file?.name
                                         )}
                                     </div>
-
                                     <label className="absolute inset-0 cursor-pointer">
                                         <input
                                             type="file"
@@ -494,7 +533,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                             className="hidden"
                                         />
                                     </label>
-
                                     {(credentials.medicalLicense.file || credentials.medicalLicense.documentUrl) && (
                                         <button
                                             type="button"
@@ -530,7 +568,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                                     </button>
                                                 )}
                                             </div>
-
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
@@ -603,7 +640,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                                     </select>
                                                 </div>
                                             </div>
-
                                             <div className="mt-6 relative">
                                                 <div
                                                     className={`border-2 border-dashed rounded-xl text-center cursor-pointer min-h-[160px] flex items-center justify-center
@@ -612,7 +648,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                                 >
                                                     {renderUploadArea(!!cert.file, !!cert.documentUrl, cert.file?.name)}
                                                 </div>
-
                                                 <label className="absolute inset-0 cursor-pointer">
                                                     <input
                                                         type="file"
@@ -621,7 +656,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                                         className="hidden"
                                                     />
                                                 </label>
-
                                                 {(cert.file || cert.documentUrl) && (
                                                     <button
                                                         type="button"
@@ -634,7 +668,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                             </div>
                                         </div>
                                     </div>
-
                                     {index === credentials.certifications.length - 1 && (
                                         <button
                                             onClick={addCertification}
@@ -656,7 +689,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                         <h3 className="text-xl font-semibold text-gray-800">DEA Certificate (Optional)</h3>
                                     </div>
                                 </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">DEA Number</label>
@@ -698,7 +730,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                         </select>
                                     </div>
                                 </div>
-
                                 <div className="mt-6 relative">
                                     <div
                                         className={`border-2 border-dashed rounded-xl text-center cursor-pointer min-h-[160px] flex items-center justify-center
@@ -716,7 +747,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                             credentials.deaCertificate.file?.name
                                         )}
                                     </div>
-
                                     <label className="absolute inset-0 cursor-pointer">
                                         <input
                                             type="file"
@@ -725,7 +755,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                             className="hidden"
                                         />
                                     </label>
-
                                     {(credentials.deaCertificate.file || credentials.deaCertificate.documentUrl) && (
                                         <button
                                             type="button"
@@ -750,7 +779,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                         <h3 className="text-xl font-semibold text-gray-800">Malpractice Insurance (Optional)</h3>
                                     </div>
                                 </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Policy Number</label>
@@ -810,7 +838,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                         </select>
                                     </div>
                                 </div>
-
                                 <div className="mt-6 relative">
                                     <div
                                         className={`border-2 border-dashed rounded-xl text-center cursor-pointer min-h-[160px] flex items-center justify-center
@@ -828,7 +855,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                             credentials.malpracticeInsuranceCertificate.file?.name
                                         )}
                                     </div>
-
                                     <label className="absolute inset-0 cursor-pointer">
                                         <input
                                             type="file"
@@ -837,7 +863,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                             className="hidden"
                                         />
                                     </label>
-
                                     {(credentials.malpracticeInsuranceCertificate.file || credentials.malpracticeInsuranceCertificate.documentUrl) && (
                                         <button
                                             type="button"
@@ -862,7 +887,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                         <h3 className="text-xl font-semibold text-gray-800">Digital Signature (Optional)</h3>
                                     </div>
                                 </div>
-
                                 <div className="mt-6 relative">
                                     <div
                                         className={`border-2 border-dashed rounded-xl text-center cursor-pointer min-h-[160px] flex items-center justify-center
@@ -880,7 +904,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                             credentials.digitalSignature.file?.name
                                         )}
                                     </div>
-
                                     <label className="absolute inset-0 cursor-pointer">
                                         <input
                                             type="file"
@@ -889,7 +912,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                             className="hidden"
                                         />
                                     </label>
-
                                     {(credentials.digitalSignature.file || credentials.digitalSignature.documentUrl) && (
                                         <button
                                             type="button"
@@ -904,7 +926,6 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                                 </div>
                             </section>
                         </div>
-
                         <div className="mt-10 flex justify-end gap-5">
                             <button
                                 onClick={() => setIsEditMode(false)}
@@ -926,146 +947,156 @@ export default function Certifications({ userData, isEditMode = false, setIsEdit
                 ) : (
                     // ── VIEW MODE ───────────────────────────────────────────────────────────────
                     <div className="space-y-6">
-                        {[
-                            {
-                                title: credentials.medicalLicense?.licenseNumber
-                                    ? `Medical License - ${credentials.medicalLicense.licenseNumber}`
-                                    : 'Medical License',
-                                org: 'Medical Council',
-                                issued: credentials.medicalLicense?.issuedAt
-                                    ? new Date(credentials.medicalLicense.issuedAt).toLocaleDateString('en-US', {
-                                        month: 'long',
-                                        year: 'numeric',
-                                    })
-                                    : '—',
-                                expires: credentials.medicalLicense?.expiryDate
-                                    ? new Date(credentials.medicalLicense.expiryDate).toLocaleDateString('en-US', {
-                                        month: 'long',
-                                        year: 'numeric',
-                                    })
-                                    : '—',
-                            },
-                            ...(credentials.certifications || []).map((c) => ({
-                                title: c.title || 'Certification',
-                                org: c.organization || 'Unknown Organization',
-                                issued: c.issuedAt
-                                    ? new Date(c.issuedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                                    : '—',
-                                expires: c.expiryDate
-                                    ? new Date(c.expiryDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                                    : '—',
-                            })),
-                        ].map((item, index) => (
-                            <div key={index} className="bg-white rounded-3xl shadow-sm p-6">
-                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4 text-center sm:text-left">
-                                    <div className="flex flex-col sm:flex-row items-center gap-4">
-                                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto sm:mx-0">
-                                            <GraduationCap className="w-5 h-5 text-white" />
+                        {hasAnyCredentials() ? (
+                            <>
+                                {hasMedicalLicense() && (
+                                    <div className="bg-white rounded-3xl shadow-sm p-6">
+                                        <div className="flex items-center gap-3 mb-5">
+                                            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                                                <ShieldCheck className="w-5 h-5 text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-base font-semibold text-gray-800">
+                                                    Medical License
+                                                    {credentials.medicalLicense?.licenseNumber && ` - ${credentials.medicalLicense.licenseNumber}`}
+                                                </h3>
+                                                <p className="text-xs text-gray-500">Medical Council</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="text-base font-semibold text-gray-800">{item.title}</h3>
-                                            <p className="text-xs text-gray-500">{item.org}</p>
+                                        <div className="space-y-4">
+                                            <InfoBox label="License Number" value={credentials.medicalLicense?.licenseNumber || '—'} />
+                                            <InfoBox label="Status" value={credentials.medicalLicense?.status || '—'} success />
+                                            <InfoBox
+                                                label="Expiry Date"
+                                                value={
+                                                    credentials.medicalLicense?.expiryDate
+                                                        ? new Date(credentials.medicalLicense.expiryDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                                                        : '—'
+                                                }
+                                            />
                                         </div>
                                     </div>
+                                )}
 
-                                    <div className="flex justify-center sm:justify-end items-center gap-2">
-                                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium flex items-center gap-1">
-                                            <CheckCircle className="w-3 h-3" />
-                                            Active
-                                        </span>
-                                        <button className="p-1.5 hover:bg-gray-100 rounded-lg transition cursor-pointer">
-                                            <Download className="w-4 h-4 text-gray-500" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-600 text-center sm:text-left">
-                                    <div className="flex items-center justify-center sm:justify-start gap-2">
-                                        <Calendar className="w-4 h-4" />
-                                        Issued: {item.issued}
-                                    </div>
-                                    {item.expires !== '—' && (
-                                        <div className="flex items-center justify-center sm:justify-start gap-2">
-                                            <Calendar className="w-4 h-4" />
-                                            Expires: {item.expires}
+                                {credentials.certifications
+                                    .filter(cert => cert.title?.trim() || cert.organization?.trim() || cert.documentUrl)
+                                    .map((cert, index) => (
+                                        <div key={index} className="bg-white rounded-3xl shadow-sm p-6">
+                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                                        <GraduationCap className="w-5 h-5 text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-base font-semibold text-gray-800">{cert.title || 'Certification'}</h3>
+                                                        <p className="text-xs text-gray-500">{cert.organization || '—'}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-center sm:justify-end items-center gap-2">
+                                                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium flex items-center gap-1">
+                                                        <CheckCircle className="w-3 h-3" />
+                                                        {cert.status || 'Active'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-600">
+                                                <div className="flex items-center justify-center sm:justify-start gap-2">
+                                                    <Calendar className="w-4 h-4" />
+                                                    Issued: {cert.issuedAt
+                                                        ? new Date(cert.issuedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                                                        : '—'}
+                                                </div>
+                                                {cert.expiryDate && (
+                                                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                                                        <Calendar className="w-4 h-4" />
+                                                        Expires: {new Date(cert.expiryDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                                    ))}
 
-                        {/* Medical License & DEA in bottom grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Medical License */}
-                            <div className="bg-white rounded-3xl shadow-sm p-6">
-                                <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                                        <ShieldCheck className="w-5 h-5 text-blue-600" />
+                                {hasDEACertificate() && (
+                                    <div className="bg-white rounded-3xl shadow-sm p-6">
+                                        <div className="flex items-center gap-3 mb-5">
+                                            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                                <ShieldCheck className="w-5 h-5 text-purple-600" />
+                                            </div>
+                                            <h3 className="text-base font-semibold text-gray-800">DEA Certificate</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <InfoBox label="DEA Number" value={credentials.deaCertificate?.deaNumber || '—'} />
+                                            <InfoBox label="Status" value={credentials.deaCertificate?.status || '—'} success />
+                                            <InfoBox
+                                                label="Expiry Date"
+                                                value={
+                                                    credentials.deaCertificate?.expiryDate
+                                                        ? new Date(credentials.deaCertificate.expiryDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                                                        : '—'
+                                                }
+                                            />
+                                        </div>
                                     </div>
-                                    <h3 className="text-base font-semibold text-gray-800">Medical License</h3>
-                                </div>
+                                )}
 
-                                <div className="space-y-4">
-                                    <InfoBox
-                                        label="License Number"
-                                        value={credentials.medicalLicense?.licenseNumber || '—'}
-                                    />
-                                    <InfoBox
-                                        label="Status"
-                                        value={credentials.medicalLicense?.status || '—'}
-                                        success
-                                    />
-                                    <InfoBox
-                                        label="Expiry Date"
-                                        value={
-                                            credentials.medicalLicense?.expiryDate
-                                                ? new Date(credentials.medicalLicense.expiryDate).toLocaleDateString('en-US', {
-                                                    month: 'long',
-                                                    year: 'numeric',
-                                                })
-                                                : '—'
-                                        }
-                                    />
-                                </div>
-                            </div>
-
-                            {/* DEA Certificate */}
-                            <div className="bg-white rounded-3xl shadow-sm p-6">
-                                <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                                        <ShieldCheck className="w-5 h-5 text-purple-600" />
+                                {hasMalpracticeInsurance() && (
+                                    <div className="bg-white rounded-3xl shadow-sm p-6">
+                                        <div className="flex items-center gap-3 mb-5">
+                                            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                                                <ShieldCheck className="w-5 h-5 text-amber-600" />
+                                            </div>
+                                            <h3 className="text-base font-semibold text-gray-800">Malpractice Insurance</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <InfoBox label="Policy Number" value={credentials.malpracticeInsuranceCertificate?.policyNumber || '—'} />
+                                            <InfoBox label="Provider" value={credentials.malpracticeInsuranceCertificate?.insuranceProvider || '—'} />
+                                            <InfoBox label="Coverage Amount" value={credentials.malpracticeInsuranceCertificate?.coverageAmount || '—'} />
+                                            <InfoBox label="Status" value={credentials.malpracticeInsuranceCertificate?.status || '—'} success />
+                                            <InfoBox
+                                                label="Expiry Date"
+                                                value={
+                                                    credentials.malpracticeInsuranceCertificate?.expiryDate
+                                                        ? new Date(credentials.malpracticeInsuranceCertificate.expiryDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                                                        : '—'
+                                                }
+                                            />
+                                        </div>
                                     </div>
-                                    <h3 className="text-base font-semibold text-gray-800">DEA Certificate</h3>
-                                </div>
+                                )}
 
-                                <div className="space-y-4">
-                                    <InfoBox
-                                        label="DEA Number"
-                                        value={credentials.deaCertificate?.deaNumber || '—'}
-                                    />
-                                    <InfoBox
-                                        label="Status"
-                                        value={credentials.deaCertificate?.status || '—'}
-                                        success
-                                    />
-                                    <InfoBox
-                                        label="Expiry Date"
-                                        value={
-                                            credentials.deaCertificate?.expiryDate
-                                                ? new Date(credentials.deaCertificate.expiryDate).toLocaleDateString('en-US', {
-                                                    month: 'long',
-                                                    year: 'numeric',
-                                                })
-                                                : '—'
-                                        }
-                                    />
-                                </div>
+                                {hasDigitalSignature() && (
+                                    <div className="bg-white rounded-3xl shadow-sm p-6">
+                                        <div className="flex items-center gap-3 mb-5">
+                                            <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
+                                                <PenTool className="w-5 h-5 text-teal-600" />
+                                            </div>
+                                            <h3 className="text-base font-semibold text-gray-800">Digital Signature</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="rounded-2xl p-4 bg-teal-50">
+                                                <p className="text-xs text-gray-600 mb-1">Status</p>
+                                                <p className="text-sm font-medium text-teal-700 flex items-center gap-1">
+                                                    <CheckCircle className="w-4 h-4" />
+                                                    Uploaded
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="bg-white rounded-2xl shadow p-10 text-center">
+                                <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                                <h3 className="mt-4 text-lg font-medium text-gray-900">No credentials uploaded yet</h3>
+                                <p className="mt-2 text-sm text-gray-500">
+                                    Your medical license, board certifications, DEA certificate, malpractice insurance, and digital signature will appear here once added.
+                                </p>
                             </div>
-                        </div>
+                        )}
                     </div>
                 )}
 
-                {/* Preview Modal (you can reuse your existing ViewDocumentModal or implement simple one) */}
+                {/* Preview Modal */}
                 {modalState.open && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
                         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col">
