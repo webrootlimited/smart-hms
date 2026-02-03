@@ -1,20 +1,12 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { buffer } from "micro";
-import connectToDb from "@/utils/db";
-import Appointment from "@/models/Appointment";
+import connectToDb from "@/lib/connectToDb";
+import Appointment from "@/models/appointment.model";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// Stripe requires the raw body, so we need config
-export const config = {
-    api: {
-        bodyParser: false,
-    },
-};
 
 export async function POST(req) {
     await connectToDb();
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
     const sig = req.headers.get("stripe-signature");
     const buf = await req.arrayBuffer();
