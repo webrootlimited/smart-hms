@@ -1,0 +1,60 @@
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+import { buffer } from "micro";
+import connectToDb from "@/utils/db";
+import Appointment from "@/models/Appointment";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Stripe requires the raw body, so we need config
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
+
+export async function POST(req) {
+    await connectToDb();
+
+    const sig = req.headers.get("stripe-signature");
+    const buf = await req.arrayBuffer();
+    const rawBody = Buffer.from(buf);
+
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(
+            rawBody,
+            sig,
+            process.env.STRIPE_WEBHOOK_SECRET
+        );
+    } catch (err) {
+        console.error("Webhook signature verification failed:", err.message);
+        return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+    }
+
+    // Handle the event
+    switch (event.type) {
+        case "checkout.session.completed":
+            const session = event.data.object;
+
+            const appointmentId = session.metadata.appointmentId;
+
+            // Mark appointment as paid
+            const appointment = await Appointment.findById(appointmentId);
+            if (appointment) {
+                appointment.paymentInfo.status = "paid";
+                appointment.paymentInfo.stripePaymentIntent = session.payment_intent;
+                await appointment.save();
+                console.log(`Appointment ${appointmentId} marked as PAID`);
+            } else {
+                console.warn(`Appointment ${appointmentId} not found`);
+            }
+            break;
+
+        default:
+            console.log(`Unhandled event type ${event.type}`);
+    }
+
+    return NextResponse.json({ received: true });
+}

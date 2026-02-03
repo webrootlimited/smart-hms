@@ -34,3 +34,42 @@ export function generateEmployeeId(role) {
 
     return `${prefix}-${randomStr}`;
 }
+
+export function generateSlots(schedule, slotDuration, date) {
+    const slots = [];
+    if (!schedule.open) return slots;
+
+    const startParts = schedule.from.split(":").map(Number);
+    const endParts = schedule.to.split(":").map(Number);
+
+    let current = new Date(date);
+    current.setHours(startParts[0], startParts[1], 0, 0);
+
+    const end = new Date(date);
+    end.setHours(endParts[0], endParts[1], 0, 0);
+
+    const breakStart = schedule.break?.from
+        ? (() => { const b = new Date(date); b.setHours(...schedule.break.from.split(":").map(Number), 0, 0); return b; })()
+        : null;
+
+    const breakEnd = schedule.break?.to
+        ? (() => { const b = new Date(date); b.setHours(...schedule.break.to.split(":").map(Number), 0, 0); return b; })()
+        : null;
+
+    while (current < end) {
+        const slotStart = new Date(current);
+        const slotEnd = new Date(current);
+        slotEnd.setMinutes(slotEnd.getMinutes() + slotDuration);
+
+        // Skip break
+        if (breakStart && breakEnd && slotStart >= breakStart && slotStart < breakEnd) {
+            current = new Date(breakEnd);
+            continue;
+        }
+
+        slots.push({ start: slotStart, end: slotEnd });
+        current.setMinutes(current.getMinutes() + slotDuration);
+    }
+
+    return slots;
+}

@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const appointmentSchema = new mongoose.Schema(
     {
-        appointmentId: { type: String, unique: true },
 
         patientId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -12,7 +11,7 @@ const appointmentSchema = new mongoose.Schema(
 
         doctorId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Provider",
+            ref: "Doctor",
         },
 
         clinicId: {
@@ -21,7 +20,6 @@ const appointmentSchema = new mongoose.Schema(
         },
 
         appointmentType: String,
-        visitTypeCode: String, // CPT / HCPCS
 
         startTime: Date,
         endTime: Date,
@@ -29,11 +27,21 @@ const appointmentSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ["booked", "cancelled", "completed", "no-show"],
+            enum: ["booked", "cancelled", "completed", "pending"],
             index: true,
+            default: "pending",
         },
 
         isTelehealth: Boolean,
+
+        // ── Payment Info ──
+        paymentInfo: {
+            method: { type: String, enum: ["card", "mobile", "bank"], default: "card" },
+            status: { type: String, enum: ["pending", "succeeded", "failed"], default: "pending" },
+            stripeSessionId: String,
+            amount: Number,
+            currency: { type: String, default: "usd" },
+        },
     },
     { timestamps: true }
 );

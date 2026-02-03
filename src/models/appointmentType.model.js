@@ -17,10 +17,7 @@ const AppointmentTypeSchema = new Schema({
         required: true,
     },
     requiredDocuments: [
-        {
-            name: { type: String, required: true },
-            icon: { type: String },
-        },
+        String
     ],
     visitType: {
         type: String,
@@ -28,24 +25,22 @@ const AppointmentTypeSchema = new Schema({
         default: 'Both',
     },
     preVisitForms: [
-        {
-            name: { type: String, required: true },
-            isRequired: { type: Boolean, default: true },
-        },
+        String
     ],
-    eligibleProviders: [
-        {
-            providerId: { type: String, required: true },
-            name: { type: String, required: true },
-            specialty: { type: String },
-        },
+    eligibleDoctors: [
+        { type: Schema.Types.ObjectId, ref: 'DoctorProfile' }
     ],
     fee: {
         currency: { type: String, default: 'USD' },
         amount: { type: Number, default: 0 },
     },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-});
+    status: {
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'active',
+    },
+},
+    { timestamps: true }
+);
 
 export default mongoose.models.AppointmentType || mongoose.model('AppointmentType', AppointmentTypeSchema);

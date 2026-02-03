@@ -6,7 +6,7 @@ import usersImg from '@/assets/admin-dashboard/appointments-header-img.png';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Header() {
+export default function Header({ appointmentTypes }) {
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:gap-12">
@@ -29,7 +29,7 @@ export default function Header() {
                         <div className="flex items-center gap-3">
                             <div className="w-3 h-3 bg-green-500 rounded-full flex-shrink-0"></div>
                             <div>
-                                <p className="text-xl font-semibold text-gray-900">12</p>
+                                <p className="text-xl font-semibold text-gray-900">{appointmentTypes.filter((type) => type.status === "active").length}</p>
                                 <p className="text-sm text-gray-600">Active Types</p>
                             </div>
                         </div>
@@ -37,7 +37,7 @@ export default function Header() {
                         <div className="flex items-center gap-3">
                             <div className="w-3 h-3 bg-purple-500 rounded-full flex-shrink-0"></div>
                             <div>
-                                <p className="text-xl font-semibold text-gray-900">3</p>
+                                <p className="text-xl font-semibold text-gray-900">{appointmentTypes.filter((type) => type.status === "inactive").length}</p>
                                 <p className="text-sm text-gray-600">Inactive</p>
                             </div>
                         </div>
@@ -45,7 +45,7 @@ export default function Header() {
                         <div className="flex items-center gap-3">
                             <div className="w-3 h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
                             <div>
-                                <p className="text-xl font-semibold text-gray-900">8</p>
+                                <p className="text-xl font-semibold text-gray-900">{appointmentTypes.filter((type) => type.visitType === "Telehealth" || type.visitType === "Both").length}</p>
                                 <p className="text-sm text-gray-600">Telehealth enabled</p>
                             </div>
                         </div>

@@ -2,8 +2,11 @@
 "use server";
 import User from "@/models/user.model";
 import Doctor from "@/models/doctor.model";
+import Clinic from "@/models/clinic.model";
 import connectToDb from "@/lib/connectToDb";
 import bcrypt from "bcryptjs";
+import Appointment from "@/models/appointment.model";
+import { generateSlots } from "@/lib/utils";
 import { generateEmployeeId } from "@/lib/utils";
 import { uploadImage } from "@/lib/utils";
 
@@ -13,6 +16,34 @@ export async function getDoctors() {
         await connectToDb();
         const doctors = await User.find({ role: "doctor" }).populate("doctorProfile");
         console.log(doctors);
+
+        return { success: true, doctors: JSON.parse(JSON.stringify(doctors)) };
+    } catch (err) {
+        console.error("❌ Get doctors error:", err);
+        return { success: false, message: err.message || "Failed to get doctors" };
+    }
+}
+
+// Get telehalth enabled doctors
+export async function getOnlineDoctors() {
+    try {
+        await connectToDb();
+        const doctors = await User.aggregate([
+            { $match: { role: "doctor" } },
+            {
+                $lookup: {
+                    from: "doctorprofiles", // make sure collection name is correct
+                    localField: "doctorProfile",
+                    foreignField: "_id",
+                    as: "doctorProfile"
+                }
+            },
+            { $unwind: "$doctorProfile" },
+            { $match: { "doctorProfile.telehealthEnabled": true } }
+        ]);
+
+        console.log(doctors);
+
 
         return { success: true, doctors: JSON.parse(JSON.stringify(doctors)) };
     } catch (err) {
@@ -476,4 +507,74 @@ export async function deleteDoctorAssistant(userId, assistantId) {
         };
     }
 }
+
+export async function getDoctorDetailsWithSlots(userId) {
+    try {
+        await connectToDb();
+
+        // Fetch user with doctor profile populated
+        const user = await User.findById(userId)
+            .populate({
+                path: "doctorProfile",
+                populate: [
+                    { path: "workLocations.clinic", model: "Clinic" },
+                    { path: "assistants", model: "User" }
+                ],
+            });
+
+        if (!user || !user.doctorProfile) {
+            return { success: false, message: "Doctor profile not found" };
+        }
+
+        const doctor = user.doctorProfile;
+        const doctorWithSlots = JSON.parse(JSON.stringify(doctor)); // clone to modify
+
+        // Generate slots for next 7 days
+        const today = new Date();
+        for (const loc of doctorWithSlots.workLocations) {
+            loc.availableSlots = {}; // object keyed by date string
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
+                const dateKey = date.toDateString(); // e.g. "Mon Jan 27 2026"
+
+                const schedule = loc.schedule.find(s => s.day === dayOfWeek);
+                if (!schedule || !schedule.open) {
+                    loc.availableSlots[dateKey] = [];
+                    continue;
+                }
+
+                // Generate all potential slots
+                let slots = generateSlots(schedule, doctor.slotDuration, date);
+
+                // Fetch booked appointments for this doctor, clinic, and date
+                const startOfDay = new Date(date);
+                startOfDay.setHours(0, 0, 0, 0);
+                const endOfDay = new Date(date);
+                endOfDay.setHours(23, 59, 59, 999);
+
+                const appointments = await Appointment.find({
+                    doctorId: doctor._id,
+                    clinicId: loc.clinic._id,
+                    startTime: { $gte: startOfDay, $lt: endOfDay },
+                    status: "booked",
+                });
+
+                // Remove booked slots
+                slots = slots.filter(slot =>
+                    !appointments.some(a => slot.start < a.endTime && slot.end > a.startTime)
+                );
+
+                loc.availableSlots[dateKey] = slots;
+            }
+        }
+
+        return { success: true, doctor: doctorWithSlots };
+    } catch (err) {
+        console.error("❌ Get doctor details error:", err);
+        return { success: false, message: err.message || "Failed to get doctor details" };
+    }
+};
 
