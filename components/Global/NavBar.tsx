@@ -27,9 +27,13 @@ const NavBar = () => {
         {/* Desktop nav */}
         <div className="hidden md:flex gap-6">
           {navLinks.map((link) => (
-            <p
+            // <p
+            //   key={link}
+            //   className="cursor-pointer bg-linear-to-r from-[#6DDCFF] to-[#7F60F9] bg-clip-text text-transparent"
+            // >
+               <p
               key={link}
-              className="cursor-pointer bg-linear-to-r from-[#6DDCFF] to-[#7F60F9] bg-clip-text text-transparent"
+              className="cursor-pointer bg-linear-to-r from-[#7F60F9] font-semibold to-[#7F60F9] bg-clip-text text-transparent"
             >
               {link}
             </p>

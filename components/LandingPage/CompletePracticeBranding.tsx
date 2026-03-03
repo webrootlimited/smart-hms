@@ -24,7 +24,7 @@ const CompletePracticeBranding = () => {
             return (
               <div
                 key={index}
-                className="border rounded-[24px] shadow-md bg-[#F8FAFC] p-6 rounded-4   gap-3"
+                className="border rounded-[24px] shadow-md bg-[#F8FAFC] p-6 gap-3 transition-all duration-300 ease-in-out hover:-translate-y-2 hover:scale-105 hover:shadow-xl hover:border-[#7F60F9]/30 cursor-pointer"
               >
                 <span className="p-2 mt-4 shadow-md rounded-lg bg-[#FFFFFF] inline-block ">
                   <img src={val.icon} alt="" />

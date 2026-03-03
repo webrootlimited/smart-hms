@@ -18,7 +18,7 @@ const seamlessData = [
 const Seamless = () => {
   return (
     <div className="overflow-hidden">
-      <div className="w-[90%] mx-auto py-6">
+      <div className="w-[90%] mx-auto py-10">
         <div className="pt-8 grid grid-cols-1 md:grid-cols-2 gap-10">
           <div>
             <img src="/seamless.png" alt="" className="w-full" />

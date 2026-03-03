@@ -79,10 +79,10 @@ export default function TrustUs() {
 
         {/* CTA */}
         <div className="flex justify-center mt-14">
-          <button className="px-6 md:px-8 py-1 bg-black text-[#B3B3B3] rounded-full cursor-pointer font-semibold flex items-center gap-2 text-sm md:text-base">
+          <button className="group relative px-8 md:px-10 py-3 bg-linear-to-r from-[#1a1a2e] to-[#4a2d8a] text-white rounded-full cursor-pointer font-semibold flex items-center gap-3 text-sm md:text-base shadow-lg shadow-[#4a2d8a]/30 transition-all duration-300 hover:shadow-xl hover:shadow-[#4a2d8a]/50 hover:scale-105 hover:-translate-y-0.5">
             See all reviews by our customers
-            <span className="text-lg">
-              <MoveUpRight />
+            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/20 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
+              <MoveUpRight className="w-4 h-4" />
             </span>
           </button>
         </div>
