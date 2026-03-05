@@ -20,7 +20,11 @@ const NavBar = () => {
       <div className="w-[90%] mx-auto py-5 flex items-center justify-between">
         <div>
           <Link href="/">
-            <img src="/landing-page/logo.png" alt="" className="cursor-pointer max-w-full" />
+            <img
+              src="/landing-page/logo.png"
+              alt=""
+              className="cursor-pointer max-w-full"
+            />
           </Link>
         </div>
 
@@ -31,7 +35,7 @@ const NavBar = () => {
             //   key={link}
             //   className="cursor-pointer bg-linear-to-r from-[#6DDCFF] to-[#7F60F9] bg-clip-text text-transparent"
             // >
-               <p
+            <p
               key={link}
               className="cursor-pointer bg-linear-to-r from-[#7F60F9] font-semibold to-[#7F60F9] bg-clip-text text-transparent"
             >
@@ -42,9 +46,11 @@ const NavBar = () => {
 
         {/* Desktop button */}
         <div className="hidden md:block">
-          <Button className="rounded-[22px] py-2 px-4 bg-transparent text-black cursor-pointer hover:bg-transparent hover:text-black border border-[#7F60F9]">
-            Start free trial
-          </Button>
+          <Link href="/login">
+            <Button className="rounded-[22px] py-2 px-4 bg-transparent text-black cursor-pointer hover:bg-transparent hover:text-black border border-[#7F60F9]">
+              Start free trial
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile drawer */}
@@ -69,9 +75,12 @@ const NavBar = () => {
                 </SheetClose>
               ))}
               <SheetClose asChild>
+              <Link href="/login" >
+
                 <Button className="rounded-[22px] py-2 px-4 w-fit bg-transparent text-black cursor-pointer hover:bg-transparent hover:text-black border border-[#7F60F9]">
                   Start free trial
                 </Button>
+              </Link>
               </SheetClose>
             </nav>
           </SheetContent>
