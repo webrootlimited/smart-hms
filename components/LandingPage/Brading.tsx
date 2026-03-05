@@ -20,7 +20,7 @@ const BrandItem = ({ brand }: { brand: (typeof brands)[number] }) => {
     return (
       <div className="flex-shrink-0 px-8 flex gap-2 items-center">
         <img src={brand.icon} alt="" />
-        <p className={`${brand.textSize} ${brand.fontWeight} bg-linear-to-r from-[#6DDCFF] to-[#7F60F9] bg-clip-text text-transparent whitespace-nowrap`}>
+        <p className={`${brand.textSize} ${brand.fontWeight} text-[#7F60F9] whitespace-nowrap`}>
           {brand.text}
         </p>
       </div>
@@ -28,7 +28,7 @@ const BrandItem = ({ brand }: { brand: (typeof brands)[number] }) => {
   }
   return (
     <div className="flex-shrink-0 px-8">
-      <p className={`${brand.textSize} ${brand.fontWeight} bg-linear-to-r from-[#6DDCFF] to-[#7F60F9] bg-clip-text text-transparent whitespace-nowrap`}>
+      <p className={`${brand.textSize} ${brand.fontWeight} text-[#7F60F9] whitespace-nowrap`}>
         {brand.text}
       </p>
     </div>

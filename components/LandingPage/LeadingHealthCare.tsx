@@ -26,7 +26,7 @@ const LeadingHealthCare = () => {
           </div>
         </div>
       </div>
-      <img src="/landing-page/Rectangle 43.png" alt="" className="mt-6 w-full" />
+      {/* <img src="/landing-page/Rectangle 43.png" alt="" className="mt-6 w-full" /> */}
     </>
   );
 };

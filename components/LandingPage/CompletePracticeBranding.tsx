@@ -11,7 +11,7 @@ const CompletePracticeBranding = () => {
       <div className="w-[90%] mx-auto py-10">
         <p className="text-2xl md:text-[36px] font-bold text-center">
           Complete Practice{" "}
-          <span className="bg-linear-to-r  from-[#6DDCFF] to-[#7F60F9] bg-clip-text text-transparent">
+          <span className="text-[#7F60F9]">
             Management
           </span>
         </p>

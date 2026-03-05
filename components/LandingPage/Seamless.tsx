@@ -21,9 +21,6 @@ const Seamless = () => {
       <div className="w-[90%] mx-auto py-10">
         <div className="pt-8 grid grid-cols-1 md:grid-cols-2 gap-10">
           <div>
-            <img src="/landing-page/seamless.png" alt="" className="w-full" />
-          </div>
-          <div>
             <div className="flex">
               <div className="bg-[#DBEAFE] py-1 px-2 items-center rounded-full flex gap-2">
                 <img src="/landing-page/video.png" alt="" className="w-5 h-4" />
@@ -59,6 +56,10 @@ const Seamless = () => {
               Learn more about Telehealth features <ArrowRight />
             </p>
           </div>
+          <div>
+            <img src="/landing-page/seamless.png" alt="" className="w-full" />
+          </div>
+         
         </div>
       </div>
     </div>

@@ -27,7 +27,7 @@ export default function Footer() {
 
       {/* CTA Banner */}
       <div className="w-[90%] max-w-7xl mx-auto -translate-y-1/2">
-        <div className="rounded-2xl bg-linear-to-r from-[#6DDCFF] to-[#7F60F9] px-8 md:px-14 py-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg shadow-[#7F60F9]/20 hover:shadow-xl hover:shadow-[#7F60F9]/30 transition-all duration-300">
+        <div className="rounded-2xl bg-linear-to-r from-[#2eb9e4] to-[#7F60F9] px-8 md:px-14 py-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg shadow-[#7F60F9]/20 hover:shadow-xl hover:shadow-[#7F60F9]/30 transition-all duration-300">
           <div>
             <h3 className="text-xl md:text-[29px] font-medium text-white text-center md:text-left">
               Master your Wellness, Live Fully

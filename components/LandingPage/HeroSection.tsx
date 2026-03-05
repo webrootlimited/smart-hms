@@ -38,7 +38,7 @@ const HeroSection = () => {
             <p className="font-semibold text-[18px] text-[#7F60F9]">
               Trusted by 50k+ users
             </p>
-            <p className="bg-linear-to-r text-[26px] from-[#6DDCFF] to-[#7F60F9] bg-clip-text text-transparent">
+            <p className="text-[26px] text-[#7F60F9]">
               &#9733;&#9733;&#9733;&#9733;&#9734;{" "}
               <span className="text-[16px] font-semibold text-[#7F60F9]">
                 4.1/5
@@ -51,7 +51,7 @@ const HeroSection = () => {
           <img
             src="/landing-page/hero-section.png"
             alt=""
-            className="w-full max-w-sm md:max-w-none"
+            className=""
           />
         </div>
       </div>
