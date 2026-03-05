@@ -20,7 +20,7 @@ const NavBar = () => {
       <div className="w-[90%] mx-auto py-5 flex items-center justify-between">
         <div>
           <Link href="/">
-            <img src="/logo.png" alt="" className="cursor-pointer max-w-full" />
+            <img src="/landing-page/logo.png" alt="" className="cursor-pointer max-w-full" />
           </Link>
         </div>
 
@@ -57,7 +57,7 @@ const NavBar = () => {
           <SheetContent side="right" className="w-70">
             <SheetHeader>
               <SheetTitle>
-                <img src="/logo.png" alt="SmartHMS" />
+                <img src="/landing-page/logo.png" alt="SmartHMS" />
               </SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-5 px-4">

@@ -109,7 +109,7 @@ export default function Footer() {
 
         {/* Logo centered */}
         <div className="flex justify-center mt-14 mb-10">
-          <img src="/logo.png" alt="SmartHMS" className="max-w-full opacity-80 hover:opacity-100 transition-opacity duration-300" />
+          <img src="/landing-page/logo.png" alt="SmartHMS" className="max-w-full opacity-80 hover:opacity-100 transition-opacity duration-300" />
         </div>
 
         {/* Bottom bar */}

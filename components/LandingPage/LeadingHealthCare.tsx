@@ -6,7 +6,7 @@ const LeadingHealthCare = () => {
     <>
       <div className="w-[90%] mx-auto pt-8 grid grid-cols-1 md:grid-cols-2 gap-10">
         <div>
-          <img src="/LeadingHealthCare.png" alt="Leading Health Care" className="w-full" />
+          <img src="/landing-page/LeadingHealthCare.png" alt="Leading Health Care" className="w-full" />
         </div>
         <div className="flex justify-center items-center">
           <div className="w-full md:w-[70%] text-center md:text-left">
@@ -26,7 +26,7 @@ const LeadingHealthCare = () => {
           </div>
         </div>
       </div>
-      <img src="/Rectangle 43.png" alt="" className="mt-6 w-full" />
+      <img src="/landing-page/Rectangle 43.png" alt="" className="mt-6 w-full" />
     </>
   );
 };

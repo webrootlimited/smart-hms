@@ -2,15 +2,15 @@ import { ArrowRight } from "lucide-react";
 import React from "react";
 const seamlessData = [
   {
-    icon: "/seamless1.png",
+    icon: "/landing-page/seamless1.png",
     title: "Secure File Sharing During Calls",
   },
   {
-    icon: "/seamless2.png",
+    icon: "/landing-page/seamless2.png",
     title: "Integrated Chat & Notes",
   },
   {
-    icon: "/seamless3.png",
+    icon: "/landing-page/seamless3.png",
     title: "End-to-End Encryption",
   },
 ];
@@ -21,12 +21,12 @@ const Seamless = () => {
       <div className="w-[90%] mx-auto py-10">
         <div className="pt-8 grid grid-cols-1 md:grid-cols-2 gap-10">
           <div>
-            <img src="/seamless.png" alt="" className="w-full" />
+            <img src="/landing-page/seamless.png" alt="" className="w-full" />
           </div>
           <div>
             <div className="flex">
               <div className="bg-[#DBEAFE] py-1 px-2 items-center rounded-full flex gap-2">
-                <img src="/video.png" alt="" className="w-5 h-4" />
+                <img src="/landing-page/video.png" alt="" className="w-5 h-4" />
                 <span className="text-[#1D4ED8] font-semibold text-[12px]">
                   VIRTUAL CARE
                 </span>

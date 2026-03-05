@@ -6,19 +6,19 @@ const testimonials = [
   {
     name: "Albert Flores",
     role: "Heart patient",
-    image: "/tu1.png",
+    image: "/landing-page/tu1.png",
     playing: false,
   },
   {
     name: "Leslie Alexander",
     role: "Diabetes patient",
-    image: "/tu2.png",
+    image: "/landing-page/tu2.png",
     playing: true,
   },
   {
     name: "Courtney Henry",
     role: "Eye patient",
-    image: "/tu3.png",
+    image: "/landing-page/tu3.png",
     playing: false,
   },
 ];

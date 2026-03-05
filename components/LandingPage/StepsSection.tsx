@@ -5,20 +5,20 @@ const steps = [
     id: 1,
     title: "Register / Login",
     description: "Securely create your account or log in to the HMS platform.",
-    image: "/simplestep1.png",
+    image: "/landing-page/simplestep1.png",
   },
   {
     id: 2,
     title: "Book Appointment",
     description:
       "Select your preferred doctor, time, and service effortlessly.",
-    image: "/simplestep2.png",
+    image: "/landing-page/simplestep2.png",
   },
   {
     id: 3,
     title: "Attend Visit",
     description: "Join your consultation on-site or via integrated telehealth.",
-    image: "/simplestep3.png",
+    image: "/landing-page/simplestep3.png",
   },
 ];
 

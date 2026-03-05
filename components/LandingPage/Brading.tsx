@@ -1,9 +1,9 @@
 import React from "react";
 
 const brands = [
-  { type: "icon-text", icon: "/hospital-icon.png", text: "HMS", textSize: "text-[24px]", fontWeight: "font-bold" },
-  { type: "image", icon: "/HMS.png" },
-  { type: "icon-text", icon: "/earth-icon.png", text: "Heal-trust", textSize: "text-[13px]", fontWeight: "font-medium" },
+  { type: "icon-text", icon: "/landing-page/hospital-icon.png", text: "HMS", textSize: "text-[24px]", fontWeight: "font-bold" },
+  { type: "image", icon: "/landing-page/HMS.png" },
+  { type: "icon-text", icon: "/landing-page/earth-icon.png", text: "Heal-trust", textSize: "text-[13px]", fontWeight: "font-medium" },
   { type: "text", text: "HMS", textSize: "text-[24px]", fontWeight: "font-bold" },
   { type: "text", text: "SmartHMS", textSize: "text-[24px]", fontWeight: "font-bold" },
 ];
