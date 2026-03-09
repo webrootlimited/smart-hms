@@ -35,7 +35,7 @@ export default function AppointmentTypesHeader({
           </div>
         </div>
         <Link
-          href="/add-appointment-type"
+          href="/admin/add-appointment-type"
           className="flex items-center gap-2 px-4 py-2.5 bg-[#0284C7] text-white text-sm font-semibold rounded-xl hover:opacity-90 transition"
         >
           <Plus className="w-4 h-4" /> Add Appointment Type

@@ -112,12 +112,12 @@ export default function AddClinicLocation() {
       {/* Header bar */}
       <div className="flex items-center justify-between bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
         <div className="flex items-center gap-3">
-          <Link href="/clinic-settings" className="p-2 hover:bg-gray-50 rounded-lg transition">
+          <Link href="/admin/clinic-settings" className="p-2 hover:bg-gray-50 rounded-lg transition">
             <ArrowLeft className="w-4 h-4 text-[#6A7282]" />
           </Link>
           <h1 className="text-base font-bold text-[#101828]">Add New Clinic Location</h1>
         </div>
-        <Link href="/clinic-settings" className="p-2 hover:bg-gray-50 rounded-lg transition">
+        <Link href="/admin/clinic-settings" className="p-2 hover:bg-gray-50 rounded-lg transition">
           <X className="w-4 h-4 text-[#6A7282]" />
         </Link>
       </div>
@@ -753,7 +753,7 @@ function SuccessPage({ onBack }: { onBack: () => void }) {
       {/* Footer actions */}
       <div className="flex items-center justify-center gap-3">
         <Link
-          href="/clinic-settings"
+          href="/admin/clinic-settings"
           className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl hover:bg-gray-50 transition"
         >
           <ChevronLeft className="w-4 h-4" /> Back to Clinic List

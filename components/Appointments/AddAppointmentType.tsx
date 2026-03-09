@@ -68,7 +68,7 @@ export default function AddAppointmentType() {
     <div className="space-y-6">
       {/* Back link */}
       <Link
-        href="/appointments"
+        href="/admin/appointments"
         className="inline-flex items-center gap-1.5 text-sm text-[#6A7282] hover:text-[#101828] transition"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Appointment Types
@@ -401,7 +401,7 @@ export default function AddAppointmentType() {
       {/* Footer Actions */}
       <div className="flex items-center justify-between pb-4">
         <Link
-          href="/appointments"
+          href="/admin/appointments"
           className="px-5 py-2.5 text-sm font-semibold text-[#4A5565] hover:text-[#101828] transition flex items-center gap-1.5"
         >
           <X className="w-4 h-4" /> Cancel

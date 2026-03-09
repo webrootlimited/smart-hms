@@ -19,4 +19,9 @@ export interface Clinic {
   services: { label: string; color: string; bg: string }[];
   accentFrom: string;
   accentTo: string;
+  departments: string[];
+  headDoctor: string;
+  established: string;
+  beds: number;
+  avgWaitTime: string;
 }

@@ -30,7 +30,7 @@ export default function ProvidersHeader({
           </div>
         </div>
         <Link
-          href="/add-provider"
+          href="/admin/add-provider"
           className="flex items-center gap-2 px-4 py-2.5 bg-[#0284C7] text-white text-sm font-semibold rounded-xl hover:opacity-90 transition"
         >
           <Plus className="w-4 h-4" /> Add Provider

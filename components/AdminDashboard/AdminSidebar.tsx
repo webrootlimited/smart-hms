@@ -13,23 +13,24 @@ import {
   Bell,
   DollarSign,
   Activity,
+  ClipboardList,
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Appointments", icon: CalendarDays, href: "/appointments" },
-  { label: "Providers", icon: Stethoscope, href: "/providers" },
-  { label: "Patients", icon: UserRound, href: "/patients" },
-  { label: "User Management", icon: UserCog, href: "/user-management" },
-  { label: "Reports", icon: FileBarChart, href: "/reports" },
-  { label: "Clinic Settings", icon: Settings, href: "/clinic-settings" },
-  { label: "Notifications", icon: Bell, href: "/notifications" },
-  { label: "Billing Rules", icon: DollarSign, href: "/billing-rules" },
-  { label: "Analytics", icon: Activity, href: "/analytics" },
-  { label: "Settings", icon: Settings, href: "/settings" },
+  { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
+  { label: "Appointments", icon: CalendarDays, href: "/admin/appointments" },
+  { label: "Providers", icon: Stethoscope, href: "/admin/providers" },
+  { label: "Patients", icon: UserRound, href: "/admin/patients" },
+  { label: "User Management", icon: UserCog, href: "/admin/user-management" },
+  { label: "Clinic Settings", icon: Settings, href: "/admin/clinic-settings" },
+  { label: "Notifications", icon: Bell, href: "/admin/notifications" },
+  { label: "Billing Rules", icon: DollarSign, href: "/admin/billing-rules" },
+  { label: "Analytics", icon: Activity, href: "/admin/analytics" },
+  { label: "Activity Logs", icon: ClipboardList, href: "/admin/activity" },
+  { label: "Settings", icon: Settings, href: "/admin/settings" },
 ];
 
 export default function AdminSidebar({
@@ -67,7 +68,7 @@ export default function AdminSidebar({
       {/* Nav */}
       <nav className="flex-1 px-2 py-2 space-y-1 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href + item.label}

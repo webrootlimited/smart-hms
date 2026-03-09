@@ -49,7 +49,7 @@ export default function AddNewProvider() {
     <div className="space-y-6">
       {/* Back link */}
       <Link
-        href="/providers"
+        href="/admin/providers"
         className="inline-flex items-center gap-1.5 text-sm text-[#6A7282] hover:text-[#101828] transition"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Providers

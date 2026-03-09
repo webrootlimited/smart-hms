@@ -65,7 +65,7 @@ export default function ProviderDetailMain() {
     <div className="space-y-5">
       {/* Back button */}
       <Link
-        href="/providers"
+        href="/admin/providers"
         className="inline-flex items-center gap-2 text-sm font-medium text-[#6A7282] hover:text-[#101828] transition"
       >
         <ArrowLeft className="w-4 h-4" />
