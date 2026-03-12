@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt, { JwtPayload } from "jsonwebtoken";
 
-interface HmsJwtPayload extends JwtPayload {
+interface HmsJwtPayload {
   userId: string;
   role: string;
   email: string;
   profileSlug?: string;
+  exp?: number;
+}
+
+function decodeJwt(token: string): HmsJwtPayload | null {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
 }
 
 function getRoleRoute(role: string, profileSlug?: string): string {
@@ -35,7 +46,7 @@ export function proxy(request: NextRequest) {
   // Has token → decode and check role
   if (token) {
     try {
-      const decoded = jwt.decode(token) as HmsJwtPayload | null;
+      const decoded = decodeJwt(token);
       if (!decoded) throw new Error("Invalid token");
 
       // Check if token is expired
