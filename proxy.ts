@@ -20,7 +20,7 @@ function decodeJwt(token: string): HmsJwtPayload | null {
 }
 
 // git checking if user is authenticated and has access to the route, redirecting if not
-
+// again
 
 function getRoleRoute(role: string, profileSlug?: string): string {
   if (role === "ADMIN" || role === "CLINIC_ADMIN") return "/admin/dashboard";
