@@ -19,6 +19,8 @@ function decodeJwt(token: string): HmsJwtPayload | null {
   }
 }
 
+
+
 function getRoleRoute(role: string, profileSlug?: string): string {
   if (role === "ADMIN" || role === "CLINIC_ADMIN") return "/admin/dashboard";
   if (role === "DOCTOR") return `/doctor/${profileSlug || "me"}/dashboard`;
