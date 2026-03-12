@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtDecode, JwtPayload } from "jwt-decode";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 interface HmsJwtPayload extends JwtPayload {
   userId: string;
@@ -35,7 +35,8 @@ export function proxy(request: NextRequest) {
   // Has token → decode and check role
   if (token) {
     try {
-      const decoded = jwtDecode<HmsJwtPayload>(token);
+      const decoded = jwt.decode(token) as HmsJwtPayload | null;
+      if (!decoded) throw new Error("Invalid token");
 
       // Check if token is expired
       if (decoded.exp && decoded.exp * 1000 < Date.now()) {
