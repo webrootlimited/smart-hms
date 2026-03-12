@@ -1,19 +1,21 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import type { SignUpData } from "./types";
 
 export default function SignUpStep3({
   data,
   onChange,
   onNext,
+  loading,
 }: {
   data: SignUpData;
   onChange: (field: keyof SignUpData, value: string) => void;
   onNext: () => void;
+  loading?: boolean;
 }) {
   return (
     <div>
       <label className="block text-sm font-semibold text-[#334155] mb-4">
-        Role
+        I am a
       </label>
       <div className="grid grid-cols-2 gap-4">
         {(["doctor", "patient"] as const).map((r) => (
@@ -39,9 +41,19 @@ export default function SignUpStep3({
       </div>
       <button
         onClick={onNext}
-        className="w-full py-2.5 bg-[#0284C7] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition cursor-pointer text-sm mt-6"
+        disabled={!data.role || loading}
+        className="w-full py-2.5 bg-[#0284C7] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition cursor-pointer text-sm mt-6 disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        Sign Up <ArrowRight className="w-4 h-4" />
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Creating Account...
+          </>
+        ) : (
+          <>
+            Continue <ArrowRight className="w-4 h-4" />
+          </>
+        )}
       </button>
     </div>
   );

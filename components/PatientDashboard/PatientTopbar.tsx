@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, Bell, Settings, PanelLeftOpen, PanelLeftClose } from "lucide-react";
+import ProfileDropdown from "@/components/utils/ProfileDropdown";
 import { useParams } from "next/navigation";
 
 function formatPatientName(slug: string): string {
@@ -79,15 +80,11 @@ export default function PatientTopbar({
         </button>
 
         {/* Profile */}
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full bg-[#0284C7] flex items-center justify-center text-white text-sm font-bold">
-            {getInitials(patientName)}
-          </div>
-          <div className="text-right hidden md:block">
-            <p className="text-sm font-semibold text-[#101828]">{patientName}</p>
-            <p className="text-xs text-[#6A7282]">Patient ID: 48492</p>
-          </div>
-        </div>
+        <ProfileDropdown
+          name={patientName}
+          subtitle="Patient ID: 48492"
+          initials={getInitials(patientName)}
+        />
       </div>
     </header>
   );

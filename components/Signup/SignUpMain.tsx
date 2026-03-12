@@ -7,12 +7,14 @@ import SignUpForm from "./SignUpForm";
 export default function SignUpMain() {
   const [step, setStep] = useState(1);
 
+  const showIllustration = step >= 4;
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-">
       <div className="w-full max-w-275 grid grid-cols-1 lg:grid-cols-2 rounded-3xl overflow-hidden h-[calc(100vh-4rem)]">
-        {/* Left — Marketing (steps 1-3) or OTP illustration (step 4) */}
+        {/* Left — Marketing or illustration */}
         <div className="hidden lg:block">
-          {step < 4 ? (
+          {!showIllustration ? (
             <SignUpLeft />
           ) : (
             <div className="flex items-center justify-center h-full p-8">

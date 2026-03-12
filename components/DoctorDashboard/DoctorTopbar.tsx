@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, Bell, PanelLeftOpen, PanelLeftClose } from "lucide-react";
+import ProfileDropdown from "@/components/utils/ProfileDropdown";
 import { useParams } from "next/navigation";
 
 function formatDoctorName(slug: string): string {
@@ -63,15 +64,11 @@ export default function DoctorTopbar({
         </button>
 
         {/* Profile */}
-        <div className="flex items-center gap-2">
-          <div className="text-right">
-            <p className="text-sm font-semibold text-[#101828]">{doctorName}</p>
-            <p className="text-xs text-[#6A7282]">Cardiologist</p>
-          </div>
-          <div className="w-9 h-9 rounded-full bg-[#0284C7] flex items-center justify-center text-white text-sm font-bold">
-            {doctorName.split(" ").map((w) => w[0]).join("").slice(0, 2)}
-          </div>
-        </div>
+        <ProfileDropdown
+          name={doctorName}
+          subtitle="Cardiologist"
+          initials={doctorName.split(" ").map((w) => w[0]).join("").slice(0, 2)}
+        />
       </div>
     </header>
   );

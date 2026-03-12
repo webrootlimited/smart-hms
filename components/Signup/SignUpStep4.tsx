@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck, Loader2 } from "lucide-react";
+import instance from "@/utils/instance";
 import type { SignUpData } from "./types";
 
 const OTP_LENGTH = 6;
@@ -14,11 +15,16 @@ export default function SignUpStep4({
 }: {
   data: SignUpData;
   onChange: (field: keyof SignUpData, value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (tokenData: {
+    accessToken: string;
+    user: { profileSlug: string };
+  }) => void;
 }) {
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [timer, setTimer] = useState(RESEND_SECONDS);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (timer <= 0) return;
@@ -65,6 +71,47 @@ export default function SignUpStep4({
     inputsRef.current[focusIdx]?.focus();
   };
 
+  const handleVerify = async () => {
+    const otp = digits.join("");
+    if (otp.length !== OTP_LENGTH) return;
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const { data: res } = await instance.post("/api/auth/verify-otp", {
+        email: data.email,
+        otp,
+      });
+
+      if (!res.success) {
+        setError(res.message || "Verification failed");
+        setLoading(false);
+        return;
+      }
+
+      onSubmit({ accessToken: res.accessToken, user: res.user });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setError(
+        axiosErr.response?.data?.message || "Verification failed. Please try again."
+      );
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    try {
+      await instance.post("/api/auth/resend-otp", { email: data.email });
+      setTimer(RESEND_SECONDS);
+      setDigits(Array(OTP_LENGTH).fill(""));
+      setError("");
+      inputsRef.current[0]?.focus();
+    } catch {
+      setError("Failed to resend OTP. Please try again.");
+    }
+  };
+
   const maskedEmail = data.email
     ? data.email.replace(/^(.{2})(.*)(@)/, (_, a, b, c) => a + "*".repeat(b.length) + c)
     : "****@example.com";
@@ -85,6 +132,12 @@ export default function SignUpStep4({
         <br />
         Please check your inbox.
       </p>
+
+      {error && (
+        <div className="mb-3 p-2.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
+          {error}
+        </div>
+      )}
 
       <div className="flex justify-center gap-2 mb-4" onPaste={handlePaste}>
         {digits.map((d, i) => (
@@ -113,7 +166,7 @@ export default function SignUpStep4({
           </span>
         ) : (
           <button
-            onClick={() => setTimer(RESEND_SECONDS)}
+            onClick={handleResend}
             className="text-[#0284C7] font-semibold hover:underline cursor-pointer"
           >
             Resend code
@@ -122,11 +175,20 @@ export default function SignUpStep4({
       </div>
 
       <button
-        onClick={onSubmit}
-        disabled={digits.some((d) => !d)}
+        onClick={handleVerify}
+        disabled={digits.some((d) => !d) || loading}
         className="w-full py-2 bg-[#0284C7] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Verify <ArrowRight className="w-4 h-4" />
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Verifying...
+          </>
+        ) : (
+          <>
+            Verify <ArrowRight className="w-4 h-4" />
+          </>
+        )}
       </button>
 
       <p className="text-xs text-gray-400 mt-3 flex items-center justify-center gap-1">

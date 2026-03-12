@@ -1,11 +1,167 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  ShieldCheck,
+  Loader2,
+} from "lucide-react";
+import { setSession } from "@/auth/setSession";
+import instance from "@/utils/instance";
+
+const OTP_LENGTH = 6;
+const RESEND_SECONDS = 60;
 
 const LoginMain = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
+  const [timer, setTimer] = useState(0);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    if (timer <= 0) return;
+    const id = setInterval(() => setTimer((t) => t - 1), 1000);
+    return () => clearInterval(id);
+  }, [timer]);
+
+  useEffect(() => {
+    if (showOtp) {
+      inputsRef.current[0]?.focus();
+    }
+  }, [showOtp]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const { data } = await instance.post("/api/auth/login", {
+        email,
+        password,
+      });
+
+      if (!data.success) {
+        setError(data.message || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      await setSession(data.accessToken);
+
+      const { role, profileSlug } = data.user;
+      if (role === "ADMIN" || role === "CLINIC_ADMIN") {
+        router.push("/admin/dashboard");
+      } else if (role === "DOCTOR") {
+        router.push(`/doctor/${profileSlug}/dashboard`);
+      } else if (role === "PATIENT") {
+        router.push(`/patient/${profileSlug}/dashboard`);
+      } else {
+        router.push("/");
+      }
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setError(
+        axiosErr.response?.data?.message || "Unable to connect to server"
+      );
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setError("");
+    try {
+      await instance.post("/api/auth/resend-otp", { email });
+      setShowOtp(true);
+      setDigits(Array(OTP_LENGTH).fill(""));
+      setTimer(RESEND_SECONDS);
+    } catch {
+      setError("Failed to resend OTP. Please try again.");
+    }
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const char = value.slice(-1);
+    const next = [...digits];
+    next[index] = char;
+    setDigits(next);
+    if (char && index < OTP_LENGTH - 1) {
+      inputsRef.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !digits[index] && index > 0) {
+      inputsRef.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
+    if (!pasted) return;
+    const next = [...digits];
+    for (let i = 0; i < pasted.length; i++) next[i] = pasted[i];
+    setDigits(next);
+    inputsRef.current[Math.min(pasted.length, OTP_LENGTH - 1)]?.focus();
+  };
+
+  const handleVerifyOtp = async () => {
+    const otp = digits.join("");
+    if (otp.length !== OTP_LENGTH) return;
+
+    setError("");
+    setOtpLoading(true);
+
+    try {
+      const { data } = await instance.post("/api/auth/verify-otp", {
+        email,
+        otp,
+      });
+
+      if (!data.success) {
+        setError(data.message || "Verification failed");
+        setOtpLoading(false);
+        return;
+      }
+
+      // OTP verified — set session and redirect
+      await setSession(data.accessToken);
+
+      const { role, profileSlug } = data.user;
+      if (role === "ADMIN" || role === "CLINIC_ADMIN") {
+        router.push("/admin/dashboard");
+      } else if (role === "DOCTOR") {
+        router.push(`/doctor/${profileSlug}/dashboard`);
+      } else if (role === "PATIENT") {
+        router.push(`/patient/${profileSlug}/dashboard`);
+      } else {
+        router.push("/");
+      }
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setError(
+        axiosErr.response?.data?.message || "Verification failed. Please try again."
+      );
+      setOtpLoading(false);
+    }
+  };
+
+  const isEmailNotVerified = error === "Please verify your email before logging in";
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50 ">
@@ -15,7 +171,6 @@ const LoginMain = () => {
           className="relative hidden lg:flex flex-col justify-between p-10 bg-cover bg-center"
           style={{ backgroundImage: "url('/auth/login.png')" }}
         >
-          {/* Overlay */}
           <div
             className="absolute inset-0"
             style={{
@@ -24,7 +179,6 @@ const LoginMain = () => {
             }}
           />
 
-          {/* Top — Shield icon */}
           <div className="relative z-10">
             <div className="w-12 h-12 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
               <img src="/auth/shield.png" alt="" className="w-7 h-7" />
@@ -38,14 +192,21 @@ const LoginMain = () => {
             </p>
           </div>
 
-          {/* Bottom — Text + badge */}
           <div className="relative z-10 text-white bg-[#FFFFFF1A] rounded-[10px]">
-            
-
-            <div className="flex items-center gap-3  px-4 py-2 rounded-lg w-max">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-lg w-max">
               <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-3 h-3 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <span className="text-sm text-white">24/7 Support Access</span>
@@ -53,19 +214,110 @@ const LoginMain = () => {
           </div>
         </div>
 
-     
         <div className="flex flex-col justify-center px-8 sm:px-12 lg:px-14 py-6 relative">
-            <div className="absolute top-0 right-0">
-                <img src="/auth/overlay.png" alt="" />
-            </div>
+          <div className="absolute top-0 right-0">
+            <img src="/auth/overlay.png" alt="" />
+          </div>
           <div>
-            <h1 className="text-[30px] font-bold text-[#0F172A]">Welcome Back</h1>
+            <h1 className="text-[30px] font-bold text-[#0F172A]">
+              Welcome Back
+            </h1>
             <p className="mt-1 text-[#64748B] ">
               Enter your credentials to access your dashboard.
             </p>
           </div>
 
-          <form className="mt-5 space-y-3" onSubmit={(e) => e.preventDefault()}>
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+              <p>{error}</p>
+              {isEmailNotVerified && !showOtp && (
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  className="mt-2 text-[#0284C7] font-semibold hover:underline cursor-pointer text-sm"
+                >
+                  Resend Verification Code
+                </button>
+              )}
+            </div>
+          )}
+
+          {showOtp ? (
+            <div className="mt-5 text-center">
+              <div className="flex justify-center mb-2">
+                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-[#0284C7]" />
+                </div>
+              </div>
+              <h3 className="text-base font-bold text-[#1E293B] mb-0.5">
+                Enter Verification Code
+              </h3>
+              <p className="text-xs text-gray-500 mb-4">
+                We&apos;ve sent a 6-digit code to your email.
+              </p>
+
+              <div className="flex justify-center gap-2 mb-4" onPaste={handleOtpPaste}>
+                {digits.map((d, i) => (
+                  <input
+                    key={i}
+                    ref={(el) => { inputsRef.current[i] = el; }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={d}
+                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                    className="w-10 h-11 text-center text-base font-bold border-2 border-gray-200 rounded-xl focus:border-[#0284C7] focus:ring-2 focus:ring-[#0284C7]/20 outline-none transition-all"
+                  />
+                ))}
+              </div>
+
+              <div className="text-xs text-gray-500 mb-3">
+                {timer > 0 ? (
+                  <span>
+                    Resend OTP in{" "}
+                    <span className="font-semibold text-[#0284C7]">
+                      {String(Math.floor(timer / 60)).padStart(2, "0")}:
+                      {String(timer % 60).padStart(2, "0")}
+                    </span>
+                  </span>
+                ) : (
+                  <button
+                    onClick={handleResendOtp}
+                    className="text-[#0284C7] font-semibold hover:underline cursor-pointer"
+                  >
+                    Resend code
+                  </button>
+                )}
+              </div>
+
+              <button
+                onClick={handleVerifyOtp}
+                disabled={digits.some((d) => !d) || otpLoading}
+                className="w-full py-2.5 bg-[#0284C7CC] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {otpLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    Verify & Sign In <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => { setShowOtp(false); setError(""); }}
+                className="mt-3 text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
+              >
+                Back to login
+              </button>
+            </div>
+          ) : (
+          <>
+          <form className="mt-5 space-y-3" onSubmit={handleSubmit}>
             {/* Email */}
             <div>
               <label className="block text-sm font-semibold text-[#334155] mb-1.5">
@@ -75,8 +327,11 @@ const LoginMain = () => {
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="email"
-                  placeholder="dr.smith@hospital.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@hms.com"
                   className="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 outline-none focus:border-[#0A4B85] focus:ring-2 focus:ring-[#0A4B85]/10 transition-all duration-200 placeholder:text-gray-400"
+                  required
                 />
               </div>
             </div>
@@ -98,8 +353,11 @@ const LoginMain = () => {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  defaultValue="password123"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
                   className="w-full pl-11 pr-12 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 outline-none focus:border-[#0A4B85] focus:ring-2 focus:ring-[#0A4B85]/10 transition-all duration-200"
+                  required
                 />
                 <button
                   type="button"
@@ -118,10 +376,20 @@ const LoginMain = () => {
             {/* Sign In Button */}
             <button
               type="submit"
-              className="w-full py-2.5 bg-[#0284C7CC] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-200 cursor-pointer text-sm"
+              disabled={loading}
+              className="w-full py-2.5 bg-[#0284C7CC] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-200 cursor-pointer text-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Sign In
-              <ArrowRight className="w-4 h-4" />
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 
@@ -164,14 +432,19 @@ const LoginMain = () => {
                 <path d="M11 12H0v11h11V12z" fill="#00A4EF" />
                 <path d="M23 12H12v11h11V12z" fill="#FFB900" />
               </svg>
-              <span className="text-sm font-medium text-gray-700">Microsoft</span>
+              <span className="text-sm font-medium text-gray-700">
+                Microsoft
+              </span>
             </button>
           </div>
 
           {/* Sign Up link */}
           <p className="text-center text-sm text-gray-500 mt-4">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-[#0A4B85] font-semibold hover:underline">
+            <Link
+              href="/signup"
+              className="text-[#0A4B85] font-semibold hover:underline"
+            >
               Sign Up
             </Link>
           </p>
@@ -181,6 +454,8 @@ const LoginMain = () => {
             <ShieldCheck className="w-3.5 h-3.5" />
             HIPAA Compliant & GDPR Secure
           </p>
+          </>
+          )}
         </div>
       </div>
     </div>

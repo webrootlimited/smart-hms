@@ -57,7 +57,7 @@ export default function SignUpStep2({
         onClick={onNext}
         className="w-full py-2.5 bg-[#0284C7] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition cursor-pointer text-sm mt-2"
       >
-        Sign Up <ArrowRight className="w-4 h-4" />
+        Continue <ArrowRight className="w-4 h-4" />
       </button>
     </div>
   );
