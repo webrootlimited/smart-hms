@@ -10,6 +10,7 @@ import {
   FileText,
   Video,
   CreditCard,
+  Settings,
   Headphones,
 } from "lucide-react";
 
@@ -21,6 +22,7 @@ const navItems = [
   { label: "Medical Records", icon: FileText, segment: "medical-records" },
   { label: "Telehealth", icon: Video, segment: "telehealth" },
   { label: "Payments", icon: CreditCard, segment: "payments" },
+  { label: "Settings", icon: Settings, segment: "settings" },
 ];
 
 export default function PatientSidebar({

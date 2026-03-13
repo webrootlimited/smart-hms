@@ -1,44 +1,45 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { User, Briefcase, Clock, MapPin, Video } from "lucide-react";
+import { User, Heart, Shield } from "lucide-react";
 import instance from "@/utils/instance";
 import getToken from "@/auth/getToken";
-import ProfileBanner from "./ProfileBanner";
+import PatientProfileBanner from "./PatientProfileBanner";
 import PersonalInfoTab from "./PersonalInfoTab";
-import ProfessionalDetailsTab from "./ProfessionalDetailsTab";
-import WorkHoursTab from "./WorkHoursTab";
-import LocationsTab from "./LocationsTab";
-import TelehealthSettingsTab from "./TelehealthSettingsTab";
+import MedicalInfoTab from "./MedicalInfoTab";
+import EmergencyContactTab from "./EmergencyContactTab";
 
 const TABS = [
   { id: "personal", label: "Personal Information", icon: User },
-  { id: "professional", label: "Professional Details", icon: Briefcase },
-  { id: "hours", label: "Work Hours", icon: Clock },
-  { id: "locations", label: "Locations", icon: MapPin },
-  { id: "telehealth", label: "Telehealth Settings", icon: Video },
+  { id: "medical", label: "Medical Information", icon: Heart },
+  { id: "emergency", label: "Emergency Contact", icon: Shield },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
 
-export interface DoctorProfile {
+export interface PatientProfile {
   id: string;
   first_name: string;
   last_name: string;
   email: string;
   phone: string;
-  specialization: string;
-  experience_years: number;
-  consultation_fee: number;
-  bio: string;
   dob: string | null;
   gender: string;
-  address: string;
-  department: string;
+  address: {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    postcode?: string;
+    country?: string;
+  };
+  blood_group: string;
+  nhs_number: string;
   photo_url: string;
-  status: string;
-  license_number: string;
-  verification_status: string;
+  emergency_contact: {
+    name: string;
+    phone: string;
+    relationship: string;
+  } | null;
 }
 
 export async function authHeaders() {
@@ -46,18 +47,18 @@ export async function authHeaders() {
   return { Authorization: `Bearer ${token}` };
 }
 
-export default function DoctorSettingsMain() {
+export default function PatientSettingsMain() {
   const [activeTab, setActiveTab] = useState<TabId>("personal");
-  const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
+  const [patient, setPatient] = useState<PatientProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async () => {
     try {
       const headers = await authHeaders();
-      const res = await instance.get("/api/doctor/profile", { headers });
-      setDoctor(res.data.doctor);
+      const res = await instance.get("/api/patient/profile", { headers });
+      setPatient(res.data.patient);
     } catch (err) {
-      console.error("Failed to fetch doctor profile:", err);
+      console.error("Failed to fetch patient profile:", err);
     } finally {
       setLoading(false);
     }
@@ -77,9 +78,8 @@ export default function DoctorSettingsMain() {
 
   return (
     <div className="space-y-5">
-      <ProfileBanner doctor={doctor} />
+      <PatientProfileBanner patient={patient} />
 
-      {/* Tabs */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-1 px-5 pt-4 border-b border-gray-100 overflow-x-auto">
           {TABS.map((tab) => (
@@ -98,13 +98,10 @@ export default function DoctorSettingsMain() {
           ))}
         </div>
 
-        {/* Tab content */}
         <div className="p-6">
-          {activeTab === "personal" && <PersonalInfoTab doctor={doctor} onSaved={fetchProfile} />}
-          {activeTab === "professional" && <ProfessionalDetailsTab doctor={doctor} onSaved={fetchProfile} />}
-          {activeTab === "hours" && <WorkHoursTab />}
-          {activeTab === "locations" && <LocationsTab />}
-          {activeTab === "telehealth" && <TelehealthSettingsTab />}
+          {activeTab === "personal" && <PersonalInfoTab patient={patient} onSaved={fetchProfile} />}
+          {activeTab === "medical" && <MedicalInfoTab patient={patient} onSaved={fetchProfile} />}
+          {activeTab === "emergency" && <EmergencyContactTab patient={patient} onSaved={fetchProfile} />}
         </div>
       </div>
     </div>

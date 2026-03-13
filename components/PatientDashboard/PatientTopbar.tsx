@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Bell, Settings, PanelLeftOpen, PanelLeftClose } from "lucide-react";
+import { Search, Bell, PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import ProfileDropdown from "@/components/utils/ProfileDropdown";
 import { useParams } from "next/navigation";
 
@@ -72,11 +72,6 @@ export default function PatientTopbar({
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-semibold">
             3
           </span>
-        </button>
-
-        {/* Settings */}
-        <button className="w-9 h-9 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition">
-          <Settings className="w-4 h-4 text-[#64748B]" />
         </button>
 
         {/* Profile */}

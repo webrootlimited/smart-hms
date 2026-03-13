@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 
 interface Doctor {
-  id: number;
+  id: string;
   name: string;
   specialty: string;
   initials: string;

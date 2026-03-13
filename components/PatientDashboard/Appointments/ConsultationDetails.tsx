@@ -5,7 +5,7 @@ import { ArrowLeft, FileText, Upload, Languages } from "lucide-react";
 import PaymentStep from "./PaymentStep";
 
 interface Doctor {
-  id: number;
+  id: string;
   name: string;
   specialty: string;
   initials: string;

@@ -1,12 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Video, Mic, Monitor, Clock, Bell } from "lucide-react";
+import { Globe, Video, Clock, Bell, Check } from "lucide-react";
 
 export default function TelehealthSettingsTab() {
-  const [autoRecord, setAutoRecord] = useState(true);
+  const [onlineServices, setOnlineServices] = useState(true);
   const [waitingRoom, setWaitingRoom] = useState(true);
   const [notifications, setNotifications] = useState(true);
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
 
   const Toggle = ({ on, onToggle }: { on: boolean; onToggle: () => void }) => (
     <button
@@ -28,24 +34,30 @@ export default function TelehealthSettingsTab() {
           <h3 className="text-base font-bold text-[#101828]">Telehealth Settings</h3>
           <p className="text-xs text-[#6A7282]">Configure your virtual consultation preferences</p>
         </div>
-        <button className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer">
-          Save Changes
-        </button>
+        <div className="flex items-center gap-2">
+          {saved && <span className="flex items-center gap-1 text-xs text-[#16A34A]"><Check className="w-3.5 h-3.5" /> Saved</span>}
+          <button
+            onClick={handleSave}
+            className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer"
+          >
+            Save Changes
+          </button>
+        </div>
       </div>
 
       <div className="space-y-4">
-        {/* Auto Record */}
+        {/* Online Services */}
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#FEF2F2] flex items-center justify-center">
-              <Video className="w-4 h-4 text-[#EF4444]" />
+            <div className="w-9 h-9 rounded-lg bg-[#F0FDF4] flex items-center justify-center">
+              <Globe className="w-4 h-4 text-[#16A34A]" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#101828]">Auto-Record Sessions</p>
-              <p className="text-[11px] text-[#6A7282]">Automatically record all telehealth sessions</p>
+              <p className="text-sm font-semibold text-[#101828]">Online Consultations</p>
+              <p className="text-[11px] text-[#6A7282]">Allow patients to book virtual appointments with you</p>
             </div>
           </div>
-          <Toggle on={autoRecord} onToggle={() => setAutoRecord(!autoRecord)} />
+          <Toggle on={onlineServices} onToggle={() => setOnlineServices(!onlineServices)} />
         </div>
 
         {/* Waiting Room */}

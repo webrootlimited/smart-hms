@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, CalendarDays, Clock, Video } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, CalendarDays, Clock, Video, Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import ConsultationDetails from "./ConsultationDetails";
+import instance from "@/utils/instance";
+import getToken from "@/auth/getToken";
 
 interface Doctor {
-  id: number;
+  id: string;
   name: string;
   specialty: string;
   initials: string;
@@ -14,26 +16,12 @@ interface Doctor {
   price: number;
 }
 
-const timeSlots = {
-  Morning: [
-    { time: "09:00 AM", duration: "15 min call" },
-    { time: "10:00 AM", duration: "15 min call" },
-    { time: "11:00 AM", duration: "15 min call" },
-    { time: "12:00 PM", duration: "15 min call" },
-  ],
-  Afternoon: [
-    { time: "01:00 PM", duration: "15 min call" },
-    { time: "02:00 PM", duration: "15 min call" },
-    { time: "03:00 PM", duration: "15 min call" },
-    { time: "04:00 PM", duration: "15 min call" },
-  ],
-  Evening: [
-    { time: "05:00 PM", duration: "15 min call" },
-    { time: "06:00 PM", duration: "15 min call" },
-    { time: "07:00 PM", duration: "15 min call" },
-    { time: "08:00 PM", duration: "15 min call" },
-  ],
-};
+interface TimeSlot {
+  time: string;
+  duration: string;
+}
+
+type GroupedSlots = Record<string, TimeSlot[]>;
 
 function formatDateLabel(date: Date) {
   return date.toLocaleDateString("en-GB", {
@@ -41,6 +29,13 @@ function formatDateLabel(date: Date) {
     month: "long",
     day: "numeric",
   });
+}
+
+function toDateString(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 export default function SelectDateTimeSlot({
@@ -52,8 +47,38 @@ export default function SelectDateTimeSlot({
 }) {
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState<Date>(today);
-  const [selectedTime, setSelectedTime] = useState("10:00 AM");
+  const [selectedTime, setSelectedTime] = useState("");
   const [showDetails, setShowDetails] = useState(false);
+  const [slots, setSlots] = useState<GroupedSlots>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSlots = async () => {
+      try {
+        setLoading(true);
+        setSelectedTime("");
+        const token = await getToken();
+        const { data } = await instance.get(
+          `/api/patient/doctors/${doctor.id}/online-slots`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { date: toDateString(selectedDate) },
+          }
+        );
+        if (data.success) {
+          setSlots(data.slots);
+          // Auto-select first available slot
+          const allSlots = Object.values(data.slots).flat() as TimeSlot[];
+          if (allSlots.length > 0) setSelectedTime(allSlots[0].time);
+        }
+      } catch {
+        setSlots({});
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSlots();
+  }, [selectedDate, doctor.id]);
 
   if (showDetails) {
     return (
@@ -65,6 +90,8 @@ export default function SelectDateTimeSlot({
       />
     );
   }
+
+  const hasSlots = Object.keys(slots).length > 0;
 
   return (
     <div className="space-y-5">
@@ -114,47 +141,61 @@ export default function SelectDateTimeSlot({
             Available Time Slots
           </h3>
 
-          <div className="space-y-5">
-            {Object.entries(timeSlots).map(([period, slots]) => (
-              <div key={period}>
-                <p className="text-xs font-semibold text-[#6A7282] uppercase tracking-wide mb-2.5">
-                  {period}
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  {slots.map((slot) => {
-                    const isSelected = selectedTime === slot.time;
-                    return (
-                      <button
-                        key={slot.time}
-                        onClick={() => setSelectedTime(slot.time)}
-                        className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border text-left transition cursor-pointer ${
-                          isSelected
-                            ? "bg-[#7C3AED] text-white border-[#7C3AED] shadow-md"
-                            : "bg-white text-[#4A5565] border-gray-200 hover:border-[#7C3AED]/40"
-                        }`}
-                      >
-                        <Video
-                          className={`w-4 h-4 shrink-0 ${
-                            isSelected ? "text-white/70" : "text-[#7C3AED]"
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-5 h-5 animate-spin text-[#7C3AED]" />
+            </div>
+          ) : !hasSlots ? (
+            <div className="text-center py-12">
+              <Clock className="w-8 h-8 text-[#D1D5DB] mx-auto mb-2" />
+              <p className="text-sm font-semibold text-[#101828]">No slots available</p>
+              <p className="text-xs text-[#6A7282] mt-1">
+                The doctor has no online hours on {formatDateLabel(selectedDate)}. Try a different date.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {Object.entries(slots).map(([period, periodSlots]) => (
+                <div key={period}>
+                  <p className="text-xs font-semibold text-[#6A7282] uppercase tracking-wide mb-2.5">
+                    {period}
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {periodSlots.map((slot) => {
+                      const isSelected = selectedTime === slot.time;
+                      return (
+                        <button
+                          key={slot.time}
+                          onClick={() => setSelectedTime(slot.time)}
+                          className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border text-left transition cursor-pointer ${
+                            isSelected
+                              ? "bg-[#7C3AED] text-white border-[#7C3AED] shadow-md"
+                              : "bg-white text-[#4A5565] border-gray-200 hover:border-[#7C3AED]/40"
                           }`}
-                        />
-                        <div>
-                          <p className="text-sm font-semibold">{slot.time}</p>
-                          <p
-                            className={`text-[10px] ${
-                              isSelected ? "text-white/70" : "text-[#6A7282]"
+                        >
+                          <Video
+                            className={`w-4 h-4 shrink-0 ${
+                              isSelected ? "text-white/70" : "text-[#7C3AED]"
                             }`}
-                          >
-                            {slot.duration}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
+                          />
+                          <div>
+                            <p className="text-sm font-semibold">{slot.time}</p>
+                            <p
+                              className={`text-[10px] ${
+                                isSelected ? "text-white/70" : "text-[#6A7282]"
+                              }`}
+                            >
+                              {slot.duration}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right: Summary */}
@@ -187,7 +228,9 @@ export default function SelectDateTimeSlot({
             <p className="text-sm font-medium text-[#101828]">
               {formatDateLabel(selectedDate)}
             </p>
-            <p className="text-sm font-bold text-[#7C3AED]">{selectedTime}</p>
+            <p className="text-sm font-bold text-[#7C3AED]">
+              {selectedTime || "No slot selected"}
+            </p>
           </div>
 
           {/* Fee */}
@@ -201,7 +244,8 @@ export default function SelectDateTimeSlot({
           {/* Continue */}
           <button
             onClick={() => setShowDetails(true)}
-            className="w-full py-3 bg-[#7C3AED] text-white text-sm font-semibold rounded-xl hover:opacity-90 transition cursor-pointer"
+            disabled={!selectedTime}
+            className="w-full py-3 bg-[#7C3AED] text-white text-sm font-semibold rounded-xl hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Continue
           </button>
