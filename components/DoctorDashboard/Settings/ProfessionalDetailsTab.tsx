@@ -2,43 +2,35 @@
 
 import { useState } from "react";
 import { Stethoscope, Award, Hash, Building2, PoundSterling, Loader2, Check } from "lucide-react";
-import { DoctorProfile, authHeaders } from "./DoctorSettingsMain";
-import instance from "@/utils/instance";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiPut } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { DoctorProfile } from "./DoctorSettingsMain";
 
 interface Props {
   doctor: DoctorProfile | null;
-  onSaved: () => void;
 }
 
-export default function ProfessionalDetailsTab({ doctor, onSaved }: Props) {
+export default function ProfessionalDetailsTab({ doctor }: Props) {
+  const queryClient = useQueryClient();
   const [experienceYears, setExperienceYears] = useState(doctor?.experience_years || 0);
   const [consultationFee, setConsultationFee] = useState(doctor?.consultation_fee || 0);
   const [licenseNumber, setLicenseNumber] = useState(doctor?.license_number || "");
   const [department, setDepartment] = useState(doctor?.department || "");
-  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleSave = async () => {
-    setSaving(true);
-    setError("");
-    setSaved(false);
-    try {
-      const headers = await authHeaders();
-      await instance.put(
-        "/api/doctor/profile",
-        { experience_years: experienceYears, consultation_fee: consultationFee, license_number: licenseNumber, department },
-        { headers }
-      );
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: () =>
+      apiPut("/api/doctor/profile", {
+        experience_years: experienceYears, consultation_fee: consultationFee,
+        license_number: licenseNumber, department,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.doctorProfile });
       setSaved(true);
-      onSaved();
       setTimeout(() => setSaved(false), 3000);
-    } catch {
-      setError("Failed to save changes");
-    } finally {
-      setSaving(false);
-    }
-  };
+    },
+  });
 
   return (
     <div className="space-y-6">
@@ -49,13 +41,13 @@ export default function ProfessionalDetailsTab({ doctor, onSaved }: Props) {
         </div>
         <div className="flex items-center gap-2">
           {saved && <span className="flex items-center gap-1 text-xs text-[#16A34A]"><Check className="w-3.5 h-3.5" /> Saved</span>}
-          {error && <span className="text-xs text-[#DC2626]">{error}</span>}
+          {error && <span className="text-xs text-[#DC2626]">Failed to save changes</span>}
           <button
-            onClick={handleSave}
-            disabled={saving}
+            onClick={() => mutate()}
+            disabled={isPending}
             className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer disabled:opacity-60"
           >
-            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
             Save Changes
           </button>
         </div>

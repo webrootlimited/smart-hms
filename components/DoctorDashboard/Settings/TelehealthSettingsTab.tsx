@@ -1,18 +1,35 @@
 "use client";
 
-import { useState } from "react";
-import { Globe, Video, Clock, Bell, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Globe, Clock, Bell, Check } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiPut } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { DoctorProfile } from "./DoctorSettingsMain";
 
-export default function TelehealthSettingsTab() {
-  const [onlineServices, setOnlineServices] = useState(true);
+interface Props {
+  doctor: DoctorProfile | null;
+}
+
+export default function TelehealthSettingsTab({ doctor }: Props) {
+  const queryClient = useQueryClient();
+  const [onlineConsultation, setOnlineConsultation] = useState(false);
   const [waitingRoom, setWaitingRoom] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [saved, setSaved] = useState(false);
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-  };
+  useEffect(() => {
+    if (doctor) setOnlineConsultation(doctor.online_consultation);
+  }, [doctor]);
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => apiPut("/api/doctor/profile", { online_consultation: onlineConsultation }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.doctorProfile });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    },
+  });
 
   const Toggle = ({ on, onToggle }: { on: boolean; onToggle: () => void }) => (
     <button
@@ -37,16 +54,17 @@ export default function TelehealthSettingsTab() {
         <div className="flex items-center gap-2">
           {saved && <span className="flex items-center gap-1 text-xs text-[#16A34A]"><Check className="w-3.5 h-3.5" /> Saved</span>}
           <button
-            onClick={handleSave}
-            className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer"
+            onClick={() => mutate()}
+            disabled={isPending}
+            className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer disabled:opacity-50"
           >
-            Save Changes
+            {isPending ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>
 
       <div className="space-y-4">
-        {/* Online Services */}
+        {/* Online Consultations */}
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-[#F0FDF4] flex items-center justify-center">
@@ -57,7 +75,7 @@ export default function TelehealthSettingsTab() {
               <p className="text-[11px] text-[#6A7282]">Allow patients to book virtual appointments with you</p>
             </div>
           </div>
-          <Toggle on={onlineServices} onToggle={() => setOnlineServices(!onlineServices)} />
+          <Toggle on={onlineConsultation} onToggle={() => setOnlineConsultation(!onlineConsultation)} />
         </div>
 
         {/* Waiting Room */}

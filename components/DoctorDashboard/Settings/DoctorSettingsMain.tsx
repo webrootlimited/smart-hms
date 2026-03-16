@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { User, Briefcase, Clock, MapPin, Video } from "lucide-react";
-import instance from "@/utils/instance";
-import getToken from "@/auth/getToken";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
 import ProfileBanner from "./ProfileBanner";
 import PersonalInfoTab from "./PersonalInfoTab";
 import ProfessionalDetailsTab from "./ProfessionalDetailsTab";
@@ -35,39 +36,25 @@ export interface DoctorProfile {
   gender: string;
   address: string;
   department: string;
+  online_consultation: boolean;
   photo_url: string;
   status: string;
   license_number: string;
   verification_status: string;
 }
 
-export async function authHeaders() {
-  const token = await getToken();
-  return { Authorization: `Bearer ${token}` };
-}
-
 export default function DoctorSettingsMain() {
   const [activeTab, setActiveTab] = useState<TabId>("personal");
-  const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async () => {
-    try {
-      const headers = await authHeaders();
-      const res = await instance.get("/api/doctor/profile", { headers });
-      setDoctor(res.data.doctor);
-    } catch (err) {
-      console.error("Failed to fetch doctor profile:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data: doctor = null, isLoading } = useQuery({
+    queryKey: queryKeys.doctorProfile,
+    queryFn: async () => {
+      const res = await apiFetch<{ success: boolean; doctor: DoctorProfile }>("/api/doctor/profile");
+      return res.doctor;
+    },
+  });
 
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-3 border-[#0284C7] border-t-transparent rounded-full animate-spin" />
@@ -100,11 +87,11 @@ export default function DoctorSettingsMain() {
 
         {/* Tab content */}
         <div className="p-6">
-          {activeTab === "personal" && <PersonalInfoTab doctor={doctor} onSaved={fetchProfile} />}
-          {activeTab === "professional" && <ProfessionalDetailsTab doctor={doctor} onSaved={fetchProfile} />}
+          {activeTab === "personal" && <PersonalInfoTab doctor={doctor} />}
+          {activeTab === "professional" && <ProfessionalDetailsTab doctor={doctor} />}
           {activeTab === "hours" && <WorkHoursTab />}
           {activeTab === "locations" && <LocationsTab />}
-          {activeTab === "telehealth" && <TelehealthSettingsTab />}
+          {activeTab === "telehealth" && <TelehealthSettingsTab doctor={doctor} />}
         </div>
       </div>
     </div>

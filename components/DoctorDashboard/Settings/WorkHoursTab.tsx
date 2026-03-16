@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Clock, Building2, Globe, Loader2, Check } from "lucide-react";
-import { authHeaders } from "./DoctorSettingsMain";
-import instance from "@/utils/instance";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiFetch, apiPut } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -17,54 +18,63 @@ interface DaySchedule {
   active: boolean;
 }
 
+interface AvailabilityItem {
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+}
+
 const buildEmpty = (): DaySchedule[] =>
   DAY_NAMES.map((day, i) => ({ day, day_of_week: i, start_time: "", end_time: "", active: false }));
 
+function applyAvailability(avail: AvailabilityItem[]): DaySchedule[] {
+  if (avail && avail.length > 0) {
+    return DAY_NAMES.map((day, i) => {
+      const found = avail.find((a) => a.day_of_week === i);
+      return found
+        ? { day, day_of_week: i, start_time: found.start_time, end_time: found.end_time, active: true }
+        : { day, day_of_week: i, start_time: "", end_time: "", active: false };
+    });
+  }
+  return buildEmpty();
+}
+
 export default function WorkHoursTab() {
+  const queryClient = useQueryClient();
   const [activeType, setActiveType] = useState<ScheduleType>("OFFLINE");
   const [offlineSchedule, setOfflineSchedule] = useState<DaySchedule[]>(buildEmpty());
   const [onlineSchedule, setOnlineSchedule] = useState<DaySchedule[]>(buildEmpty());
-  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState("");
 
   const schedule = activeType === "OFFLINE" ? offlineSchedule : onlineSchedule;
   const setSchedule = activeType === "OFFLINE" ? setOfflineSchedule : setOnlineSchedule;
 
-  const applyAvailability = useCallback(
-    (avail: { day_of_week: number; start_time: string; end_time: string }[], setter: (s: DaySchedule[]) => void) => {
-      if (avail && avail.length > 0) {
-        setter(
-          DAY_NAMES.map((day, i) => {
-            const found = avail.find((a) => a.day_of_week === i);
-            return found
-              ? { day, day_of_week: i, start_time: found.start_time, end_time: found.end_time, active: true }
-              : { day, day_of_week: i, start_time: "", end_time: "", active: false };
-          })
-        );
-      } else {
-        setter(buildEmpty());
-      }
+  useQuery({
+    queryKey: queryKeys.doctorAvailability("OFFLINE"),
+    queryFn: async () => {
+      const res = await apiFetch<{ success: boolean; availability: AvailabilityItem[] }>("/api/doctor/availability", { type: "OFFLINE" });
+      setOfflineSchedule(applyAvailability(res.availability));
+      return res.availability;
     },
-    []
-  );
+  });
 
-  useEffect(() => {
-    const fetchBoth = async () => {
-      try {
-        const headers = await authHeaders();
-        const [offRes, onRes] = await Promise.all([
-          instance.get("/api/doctor/availability?type=OFFLINE", { headers }),
-          instance.get("/api/doctor/availability?type=ONLINE", { headers }),
-        ]);
-        applyAvailability(offRes.data.availability, setOfflineSchedule);
-        applyAvailability(onRes.data.availability, setOnlineSchedule);
-      } catch (err) {
-        console.error("Failed to fetch availability:", err);
-      }
-    };
-    fetchBoth();
-  }, [applyAvailability]);
+  useQuery({
+    queryKey: queryKeys.doctorAvailability("ONLINE"),
+    queryFn: async () => {
+      const res = await apiFetch<{ success: boolean; availability: AvailabilityItem[] }>("/api/doctor/availability", { type: "ONLINE" });
+      setOnlineSchedule(applyAvailability(res.availability));
+      return res.availability;
+    },
+  });
+
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: () => apiPut("/api/doctor/availability", { schedule, type: activeType }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.doctorAvailability(activeType) });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    },
+  });
 
   const toggleDay = (idx: number) => {
     setSchedule((prev) => prev.map((d, i) => (i === idx ? { ...d, active: !d.active } : d)));
@@ -72,22 +82,6 @@ export default function WorkHoursTab() {
 
   const updateTime = (idx: number, field: "start_time" | "end_time", value: string) => {
     setSchedule((prev) => prev.map((d, i) => (i === idx ? { ...d, [field]: value } : d)));
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    setError("");
-    setSaved(false);
-    try {
-      const headers = await authHeaders();
-      await instance.put("/api/doctor/availability", { schedule, type: activeType }, { headers });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch {
-      setError("Failed to save work hours");
-    } finally {
-      setSaving(false);
-    }
   };
 
   return (
@@ -99,13 +93,13 @@ export default function WorkHoursTab() {
         </div>
         <div className="flex items-center gap-2">
           {saved && <span className="flex items-center gap-1 text-xs text-[#16A34A]"><Check className="w-3.5 h-3.5" /> Saved</span>}
-          {error && <span className="text-xs text-[#DC2626]">{error}</span>}
+          {error && <span className="text-xs text-[#DC2626]">Failed to save work hours</span>}
           <button
-            onClick={handleSave}
-            disabled={saving}
+            onClick={() => mutate()}
+            disabled={isPending}
             className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer disabled:opacity-60"
           >
-            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
             Save Changes
           </button>
         </div>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { User, Heart, Shield } from "lucide-react";
-import instance from "@/utils/instance";
-import getToken from "@/auth/getToken";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
 import PatientProfileBanner from "./PatientProfileBanner";
 import PersonalInfoTab from "./PersonalInfoTab";
 import MedicalInfoTab from "./MedicalInfoTab";
@@ -42,33 +43,18 @@ export interface PatientProfile {
   } | null;
 }
 
-export async function authHeaders() {
-  const token = await getToken();
-  return { Authorization: `Bearer ${token}` };
-}
-
 export default function PatientSettingsMain() {
   const [activeTab, setActiveTab] = useState<TabId>("personal");
-  const [patient, setPatient] = useState<PatientProfile | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async () => {
-    try {
-      const headers = await authHeaders();
-      const res = await instance.get("/api/patient/profile", { headers });
-      setPatient(res.data.patient);
-    } catch (err) {
-      console.error("Failed to fetch patient profile:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data: patient = null, isLoading } = useQuery({
+    queryKey: queryKeys.patientProfile,
+    queryFn: async () => {
+      const res = await apiFetch<{ success: boolean; patient: PatientProfile }>("/api/patient/profile");
+      return res.patient;
+    },
+  });
 
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-3 border-[#0284C7] border-t-transparent rounded-full animate-spin" />
@@ -99,9 +85,9 @@ export default function PatientSettingsMain() {
         </div>
 
         <div className="p-6">
-          {activeTab === "personal" && <PersonalInfoTab patient={patient} onSaved={fetchProfile} />}
-          {activeTab === "medical" && <MedicalInfoTab patient={patient} onSaved={fetchProfile} />}
-          {activeTab === "emergency" && <EmergencyContactTab patient={patient} onSaved={fetchProfile} />}
+          {activeTab === "personal" && <PersonalInfoTab patient={patient} />}
+          {activeTab === "medical" && <MedicalInfoTab patient={patient} />}
+          {activeTab === "emergency" && <EmergencyContactTab patient={patient} />}
         </div>
       </div>
     </div>

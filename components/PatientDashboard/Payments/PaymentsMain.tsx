@@ -7,41 +7,54 @@ import {
   Wallet,
   CreditCard,
   AlertCircle,
-  ShieldCheck,
   Lock,
   Info,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
 import PaymentCards from "./PaymentCards";
-import InsuranceInfo from "./InsuranceInfo";
 import RecentPayments from "./RecentPayments";
 
-const stats = [
-  {
-    label: "Current Balance",
-    value: "£0.00",
-    icon: Wallet,
-    color: "#16A34A",
-    bg: "bg-[#F0FDF4]",
-  },
-  {
-    label: "Payment Methods",
-    value: "3",
-    icon: CreditCard,
-    color: "#0284C7",
-    bg: "bg-[#F0F9FF]",
-  },
-  {
-    label: "Past Due",
-    value: "£145.00",
-    icon: AlertCircle,
-    color: "#EF4444",
-    bg: "bg-[#FEF2F2]",
-  },
-];
+interface SavedCard {
+  id: string;
+}
 
 export default function PaymentsMain({ onBack }: { onBack?: () => void }) {
   const params = useParams();
   const base = `/patient/${params.patientName}`;
+
+  const { data: cards = [] } = useQuery({
+    queryKey: queryKeys.patientCards,
+    queryFn: async () => {
+      const res = await apiFetch<{ success: boolean; cards: SavedCard[] }>("/api/patient/cards");
+      return res.cards;
+    },
+  });
+
+  const stats = [
+    {
+      label: "Current Balance",
+      value: "£0.00",
+      icon: Wallet,
+      color: "#16A34A",
+      bg: "bg-[#F0FDF4]",
+    },
+    {
+      label: "Payment Methods",
+      value: String(cards.length),
+      icon: CreditCard,
+      color: "#0284C7",
+      bg: "bg-[#F0F9FF]",
+    },
+    {
+      label: "Past Due",
+      value: "£145.00",
+      icon: AlertCircle,
+      color: "#EF4444",
+      bg: "bg-[#FEF2F2]",
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -95,23 +108,6 @@ export default function PaymentsMain({ onBack }: { onBack?: () => void }) {
       {/* Payment Cards */}
       <PaymentCards />
 
-      {/* HSA & FSA Banner */}
-      <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl px-5 py-3 flex items-start gap-3">
-        <ShieldCheck className="w-5 h-5 text-[#0284C7] shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-[#101828]">
-            HSA & FSA Accepted
-          </p>
-          <p className="text-xs text-[#6A7282] mt-0.5">
-            We accept Health Savings Account (HSA) and Flexible Spending Account
-            (FSA) cards for eligible medical expenses. Make sure to use these
-            cards for qualified healthcare services.
-          </p>
-        </div>
-      </div>
-
-      {/* Insurance Info */}
-      <InsuranceInfo />
 
       {/* Recent Payments */}
       <RecentPayments />

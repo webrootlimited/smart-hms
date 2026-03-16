@@ -1,17 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { User, Mail, Phone, AlertTriangle, MapPin, Calendar, Upload, Loader2, Check } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar, Upload, Loader2, Check } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DoctorProfile, authHeaders } from "./DoctorSettingsMain";
-import instance from "@/utils/instance";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiPut } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { DoctorProfile } from "./DoctorSettingsMain";
 
 interface Props {
   doctor: DoctorProfile | null;
-  onSaved: () => void;
 }
 
-export default function PersonalInfoTab({ doctor, onSaved }: Props) {
+export default function PersonalInfoTab({ doctor }: Props) {
+  const queryClient = useQueryClient();
   const [firstName, setFirstName] = useState(doctor?.first_name || "");
   const [lastName, setLastName] = useState(doctor?.last_name || "");
   const [phone, setPhone] = useState(doctor?.phone || "");
@@ -19,30 +21,20 @@ export default function PersonalInfoTab({ doctor, onSaved }: Props) {
   const [dob, setDob] = useState(doctor?.dob ? doctor.dob.split("T")[0] : "");
   const [gender, setGender] = useState(doctor?.gender || "");
   const [address, setAddress] = useState(doctor?.address || "");
-  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleSave = async () => {
-    setSaving(true);
-    setError("");
-    setSaved(false);
-    try {
-      const headers = await authHeaders();
-      await instance.put(
-        "/api/doctor/profile",
-        { first_name: firstName, last_name: lastName, phone, bio, dob: dob || undefined, gender: gender || undefined, address },
-        { headers }
-      );
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: () =>
+      apiPut("/api/doctor/profile", {
+        first_name: firstName, last_name: lastName, phone, bio,
+        dob: dob || undefined, gender: gender || undefined, address,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.doctorProfile });
       setSaved(true);
-      onSaved();
       setTimeout(() => setSaved(false), 3000);
-    } catch {
-      setError("Failed to save changes");
-    } finally {
-      setSaving(false);
-    }
-  };
+    },
+  });
 
   return (
     <div className="space-y-6">
@@ -53,13 +45,13 @@ export default function PersonalInfoTab({ doctor, onSaved }: Props) {
         </div>
         <div className="flex items-center gap-2">
           {saved && <span className="flex items-center gap-1 text-xs text-[#16A34A]"><Check className="w-3.5 h-3.5" /> Saved</span>}
-          {error && <span className="text-xs text-[#DC2626]">{error}</span>}
+          {error && <span className="text-xs text-[#DC2626]">Failed to save changes</span>}
           <button
-            onClick={handleSave}
-            disabled={saving}
+            onClick={() => mutate()}
+            disabled={isPending}
             className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer disabled:opacity-60"
           >
-            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
             Save Changes
           </button>
         </div>

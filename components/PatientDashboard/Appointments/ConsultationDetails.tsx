@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, FileText, Upload, Languages } from "lucide-react";
+import { ArrowLeft, FileText, Upload } from "lucide-react";
 import PaymentStep from "./PaymentStep";
 
 interface Doctor {
@@ -88,23 +88,6 @@ export default function ConsultationDetails({
             </div>
           </div>
 
-          {/* Preferred Language */}
-          <div>
-            <label className="text-sm font-medium text-[#101828] block mb-1.5">
-              Preferred Language
-            </label>
-            <div className="relative">
-              <Languages className="w-4 h-4 text-[#6A7282] absolute left-3 top-1/2 -translate-y-1/2" />
-              <select className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] appearance-none cursor-pointer">
-                <option>English</option>
-                <option>Spanish</option>
-                <option>French</option>
-                <option>Urdu</option>
-                <option>Arabic</option>
-                <option>Punjabi</option>
-              </select>
-            </div>
-          </div>
 
           {/* Upload Reports */}
           <div>

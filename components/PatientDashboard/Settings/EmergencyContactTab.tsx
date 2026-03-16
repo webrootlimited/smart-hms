@@ -3,43 +3,31 @@
 import { useState } from "react";
 import { User, Phone, Heart, Loader2, Check } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PatientProfile, authHeaders } from "./PatientSettingsMain";
-import instance from "@/utils/instance";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiPut } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { PatientProfile } from "./PatientSettingsMain";
 
 interface Props {
   patient: PatientProfile | null;
-  onSaved: () => void;
 }
 
-export default function EmergencyContactTab({ patient, onSaved }: Props) {
+export default function EmergencyContactTab({ patient }: Props) {
+  const queryClient = useQueryClient();
   const ec = patient?.emergency_contact;
   const [name, setName] = useState(ec?.name || "");
   const [phone, setPhone] = useState(ec?.phone || "");
   const [relationship, setRelationship] = useState(ec?.relationship || "");
-  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleSave = async () => {
-    setSaving(true);
-    setError("");
-    setSaved(false);
-    try {
-      const headers = await authHeaders();
-      await instance.put(
-        "/api/patient/emergency-contact",
-        { name, phone, relationship },
-        { headers }
-      );
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: () => apiPut("/api/patient/emergency-contact", { name, phone, relationship }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.patientProfile });
       setSaved(true);
-      onSaved();
       setTimeout(() => setSaved(false), 3000);
-    } catch {
-      setError("Failed to save changes");
-    } finally {
-      setSaving(false);
-    }
-  };
+    },
+  });
 
   return (
     <div className="space-y-6">
@@ -50,13 +38,13 @@ export default function EmergencyContactTab({ patient, onSaved }: Props) {
         </div>
         <div className="flex items-center gap-2">
           {saved && <span className="flex items-center gap-1 text-xs text-[#16A34A]"><Check className="w-3.5 h-3.5" /> Saved</span>}
-          {error && <span className="text-xs text-[#DC2626]">{error}</span>}
+          {error && <span className="text-xs text-[#DC2626]">Failed to save changes</span>}
           <button
-            onClick={handleSave}
-            disabled={saving || !name || !phone || !relationship}
+            onClick={() => mutate()}
+            disabled={isPending || !name || !phone || !relationship}
             className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer disabled:opacity-60"
           >
-            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
             Save Changes
           </button>
         </div>
@@ -67,26 +55,14 @@ export default function EmergencyContactTab({ patient, onSaved }: Props) {
           <label className="block text-xs font-semibold text-[#334155] mb-1.5">Contact Name</label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Full name"
-              className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7]"
-            />
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7]" />
           </div>
         </div>
         <div>
           <label className="block text-xs font-semibold text-[#334155] mb-1.5">Phone Number</label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+44 7700 900000"
-              className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7]"
-            />
+            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+44 7700 900000" className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7]" />
           </div>
         </div>
         <div>
