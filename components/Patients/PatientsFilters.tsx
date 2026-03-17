@@ -6,29 +6,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DEPARTMENTS, SPECIALTIES, STATUSES } from "./mockData";
+import type { PatientStatus, Gender } from "./types";
 
 export type Filters = {
   search: string;
-  department: string;
-  specialty: string;
-  status: string;
+  status: PatientStatus | "";
+  gender: Gender | "";
+  blood_group: string;
 };
 
 export const emptyFilters: Filters = {
   search: "",
-  department: "",
-  specialty: "",
   status: "",
+  gender: "",
+  blood_group: "",
 };
 
-const STATUS_MAP: Record<string, string> = {
-  Active: "ACTIVE",
-  "On Leave": "ON_LEAVE",
-  Inactive: "INACTIVE",
-};
+const STATUSES: PatientStatus[] = ["ACTIVE", "INACTIVE", "SUSPENDED"];
+const GENDERS: Gender[] = ["MALE", "FEMALE", "OTHER"];
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
-export default function ProvidersFilters({
+const statusLabel = (s: string) =>
+  s.charAt(0) + s.slice(1).toLowerCase();
+
+export default function PatientsFilters({
   filters,
   onChange,
   onClear,
@@ -38,9 +39,9 @@ export default function ProvidersFilters({
   onClear: () => void;
 }) {
   const activeFilters = [
-    filters.department && { key: "department", label: filters.department },
-    filters.specialty && { key: "specialty", label: filters.specialty },
-    filters.status && { key: "status", label: `Status: ${filters.status}` },
+    filters.status && { key: "status", label: `Status: ${statusLabel(filters.status)}` },
+    filters.gender && { key: "gender", label: `Gender: ${statusLabel(filters.gender)}` },
+    filters.blood_group && { key: "blood_group", label: `Blood: ${filters.blood_group}` },
   ].filter(Boolean) as { key: string; label: string }[];
 
   const removeFilter = (key: string) => {
@@ -63,12 +64,12 @@ export default function ProvidersFilters({
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        <div className="relative lg:col-span-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+        <div className="relative lg:col-span-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6A7282]" />
           <input
             type="text"
-            placeholder="Search Provider..."
+            placeholder="Search by name, phone, or NHS number..."
             value={filters.search}
             onChange={(e) => onChange({ ...filters, search: e.target.value })}
             className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7]"
@@ -76,38 +77,8 @@ export default function ProvidersFilters({
         </div>
 
         <Select
-          value={filters.department || "all"}
-          onValueChange={(v) => onChange({ ...filters, department: v === "all" ? "" : v })}
-        >
-          <SelectTrigger className="w-full rounded-xl">
-            <SelectValue placeholder="Department" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Departments</SelectItem>
-            {DEPARTMENTS.map((d) => (
-              <SelectItem key={d} value={d}>{d}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={filters.specialty || "all"}
-          onValueChange={(v) => onChange({ ...filters, specialty: v === "all" ? "" : v })}
-        >
-          <SelectTrigger className="w-full rounded-xl">
-            <SelectValue placeholder="Specialty" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Specialties</SelectItem>
-            {SPECIALTIES.map((s) => (
-              <SelectItem key={s} value={s}>{s}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
           value={filters.status || "all"}
-          onValueChange={(v) => onChange({ ...filters, status: v === "all" ? "" : v })}
+          onValueChange={(v) => onChange({ ...filters, status: v === "all" ? "" : (v as PatientStatus) })}
         >
           <SelectTrigger className="w-full rounded-xl">
             <SelectValue placeholder="Status" />
@@ -115,7 +86,37 @@ export default function ProvidersFilters({
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             {STATUSES.map((s) => (
-              <SelectItem key={s} value={STATUS_MAP[s] ?? s}>{s}</SelectItem>
+              <SelectItem key={s} value={s}>{statusLabel(s)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filters.gender || "all"}
+          onValueChange={(v) => onChange({ ...filters, gender: v === "all" ? "" : (v as Gender) })}
+        >
+          <SelectTrigger className="w-full rounded-xl">
+            <SelectValue placeholder="Gender" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Genders</SelectItem>
+            {GENDERS.map((g) => (
+              <SelectItem key={g} value={g}>{statusLabel(g)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filters.blood_group || "all"}
+          onValueChange={(v) => onChange({ ...filters, blood_group: v === "all" ? "" : v })}
+        >
+          <SelectTrigger className="w-full rounded-xl">
+            <SelectValue placeholder="Blood Group" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Blood Groups</SelectItem>
+            {BLOOD_GROUPS.map((b) => (
+              <SelectItem key={b} value={b}>{b}</SelectItem>
             ))}
           </SelectContent>
         </Select>

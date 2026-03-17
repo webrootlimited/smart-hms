@@ -5,6 +5,7 @@ export interface SavedCard {
   holder_name: string;
   expiry: string;
   is_primary: boolean;
+  stripe_payment_method_id?: string;
 }
 
 export const CARD_GRADIENTS: Record<string, string> = {

@@ -1,21 +1,37 @@
-export type PatientStatus = "Active" | "Inactive" | "Critical";
+export type PatientStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
+export type Gender = "MALE" | "FEMALE" | "OTHER";
+
+export interface PatientAddress {
+  line1?: string;
+  line2?: string;
+  city?: string;
+  postcode?: string;
+  country?: string;
+}
 
 export interface Patient {
   id: string;
-  name: string;
-  age: number;
-  gender: string;
-  avatar: string;
-  color: string;
-  status: PatientStatus;
-  patientId: string;
-  phone: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  address: string;
-  insurance: string;
-  primaryDoctor: string;
-  lastVisit: string;
-  nextAppointment: string;
-  balanceDue: string;
-  conditions: string[];
+  phone: string;
+  dob: string;
+  gender: Gender;
+  blood_group: string | null;
+  address: PatientAddress;
+  nhs_number: string | null;
+  photo_url: string | null;
+  status: PatientStatus;
+  createdAt: string;
+}
+
+export interface PatientsResponse {
+  success: boolean;
+  patients: Patient[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }

@@ -20,11 +20,12 @@ interface Doctor {
 }
 
 export default function PaymentStep({
-  doctor, selectedDate, selectedTime, onBack,
+  doctor, selectedDate, selectedTime, reason, onBack,
 }: {
   doctor: Doctor;
   selectedDate: Date;
   selectedTime: string;
+  reason: string;
   onBack: () => void;
 }) {
   const queryClient = useQueryClient();
@@ -137,9 +138,11 @@ export default function PaymentStep({
         selectedCard={selectedCard}
         setSelectedCard={setSelectedCard}
         total={total}
+        doctorId={doctor.id}
         doctorName={doctor.name}
         selectedDate={selectedDate}
         selectedTime={selectedTime}
+        reason={reason}
         onInvalidate={invalidate}
       />
     </div>

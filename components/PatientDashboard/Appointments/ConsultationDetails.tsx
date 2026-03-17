@@ -32,6 +32,7 @@ export default function ConsultationDetails({
   onBack: () => void;
 }) {
   const [showPayment, setShowPayment] = useState(false);
+  const [reason, setReason] = useState("");
 
   if (showPayment) {
     return (
@@ -39,6 +40,7 @@ export default function ConsultationDetails({
         doctor={doctor}
         selectedDate={selectedDate}
         selectedTime={selectedTime}
+        reason={reason}
         onBack={() => setShowPayment(false)}
       />
     );
@@ -81,6 +83,8 @@ export default function ConsultationDetails({
             <div className="relative">
               <FileText className="w-4 h-4 text-[#6A7282] absolute left-3 top-3" />
               <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
                 placeholder="Describe your health concern..."
                 rows={4}
                 className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] resize-none"

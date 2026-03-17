@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { providers } from "./mockData";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import type { ProvidersResponse } from "./types";
 import ProvidersHeader from "./ProvidersHeader";
 import ProvidersFilters, {
   type Filters,
@@ -16,39 +20,23 @@ export default function ProvidersMain() {
   const [page, setPage] = useState(1);
   const [view, setView] = useState<"card" | "list">("card");
 
-  const filtered = useMemo(() => {
-    let result = providers;
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.specialty.toLowerCase().includes(q)
-      );
-    }
-    if (filters.department) {
-      result = result.filter((p) => p.department === filters.department);
-    }
-    if (filters.specialty) {
-      result = result.filter((p) => p.specialty === filters.specialty);
-    }
-    if (filters.status) {
-      result = result.filter((p) => p.status === filters.status);
-    }
-    if (filters.location) {
-      result = result.filter((p) => p.location === filters.location);
-    }
-    return result;
-  }, [filters]);
+  const params: Record<string, string | number> = {
+    page,
+    limit: PER_PAGE,
+  };
+  if (filters.search) params.search = filters.search;
+  if (filters.status) params.status = filters.status;
+  if (filters.department) params.department = filters.department;
+  if (filters.specialty) params.specialization = filters.specialty;
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const safePage = Math.min(page, totalPages);
-  const paged = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
+  const { data, isLoading } = useQuery({
+    queryKey: queryKeys.adminDoctors(params),
+    queryFn: () =>
+      apiFetch<ProvidersResponse>("/api/admin/doctors", params as Record<string, string>),
+  });
 
-  const departments = new Set(providers.map((p) => p.department)).size;
-  const nowAvailable = providers.filter(
-    (p) => p.status === "Active" && p.nextAvailable.startsWith("Today")
-  ).length;
+  const providers = data?.doctors ?? [];
+  const pagination = data?.pagination ?? { page: 1, limit: PER_PAGE, total: 0, totalPages: 1 };
 
   const handleFilterChange = (f: Filters) => {
     setFilters(f);
@@ -58,9 +46,7 @@ export default function ProvidersMain() {
   return (
     <div className="space-y-5">
       <ProvidersHeader
-        totalProviders={providers.length}
-        departments={departments}
-        nowAvailable={nowAvailable}
+        totalProviders={pagination.total}
       />
 
       <ProvidersFilters
@@ -69,16 +55,22 @@ export default function ProvidersMain() {
         onClear={() => { setFilters(emptyFilters); setPage(1); }}
       />
 
-      <ProvidersGrid
-        providers={paged}
-        page={safePage}
-        totalPages={totalPages}
-        totalResults={filtered.length}
-        perPage={PER_PAGE}
-        view={view}
-        onViewChange={setView}
-        onPageChange={setPage}
-      />
+      {isLoading ? (
+        <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm flex items-center justify-center">
+          <Loader2 className="w-6 h-6 text-[#0284C7] animate-spin" />
+        </div>
+      ) : (
+        <ProvidersGrid
+          providers={providers}
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          totalResults={pagination.total}
+          perPage={PER_PAGE}
+          view={view}
+          onViewChange={setView}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }
