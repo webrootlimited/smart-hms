@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { ArrowLeft, CreditCard, CheckCircle2, ShieldCheck, Wifi, Trash2, Star } from "lucide-react";
+import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, apiDelete, apiPatch } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
@@ -29,9 +30,12 @@ export default function PaymentStep({
   onBack: () => void;
 }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const params = useParams();
   const [showDialog, setShowDialog] = useState(false);
   const [deleteCardId, setDeleteCardId] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [paymentDone, setPaymentDone] = useState(false);
   const total = doctor.price;
 
   const { data: savedCards = [] } = useQuery({
@@ -56,6 +60,34 @@ export default function PaymentStep({
     mutationFn: (id: string) => apiPatch(`/api/patient/cards/${id}/primary`, {}),
     onSuccess: invalidate,
   });
+
+  function formatShortDate(date: Date) {
+    return date.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
+  }
+
+  if (paymentDone) {
+    return (
+      <div className="max-w-lg mx-auto mt-12 text-center">
+        <div className="w-20 h-20 rounded-full bg-[#F0FDF4] flex items-center justify-center mx-auto mb-5">
+          <CheckCircle2 className="w-10 h-10 text-[#16A34A]" />
+        </div>
+        <h2 className="text-2xl font-bold text-[#101828] mb-2">Payment Successful!</h2>
+        <p className="text-sm text-[#6A7282] mb-1">
+          Your appointment with {doctor.name} has been confirmed.
+        </p>
+        <p className="text-sm text-[#6A7282]">
+          {formatShortDate(selectedDate)} at {selectedTime}
+        </p>
+        <p className="text-2xl font-bold text-[#16A34A] mt-4">£{total}</p>
+        <button
+          onClick={() => router.push(`/patient/${params.patientName}/appointments`)}
+          className="mt-6 px-8 py-3 bg-[#0284C7] text-white text-sm font-bold rounded-xl hover:opacity-90 transition cursor-pointer"
+        >
+          Back to Appointments
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -144,6 +176,7 @@ export default function PaymentStep({
         selectedTime={selectedTime}
         reason={reason}
         onInvalidate={invalidate}
+        onSuccess={() => { setShowDialog(false); setPaymentDone(true); }}
       />
     </div>
   );

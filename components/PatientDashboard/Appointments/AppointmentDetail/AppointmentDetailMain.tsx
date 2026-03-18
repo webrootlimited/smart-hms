@@ -5,22 +5,20 @@ import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
-import AppointmentHeader from "./AppointmentHeader";
-import PatientBanner from "./PatientBanner";
-import PatientDemographics from "./PatientDemographics";
-import TelehealthCard from "./TelehealthCard";
-import FinalizeVisit from "./FinalizeVisit";
-import type { AppointmentDetail } from "./types";
+import DetailHeader from "./DetailHeader";
+import DoctorCard from "./DoctorCard";
+import AppointmentInfo from "./AppointmentInfo";
+import type { PatientAppointmentDetail } from "./types";
 
 export default function AppointmentDetailMain() {
   const params = useParams();
   const appointmentId = params.appointmentId as string;
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: queryKeys.doctorAppointmentDetail(appointmentId),
+    queryKey: queryKeys.patientAppointmentDetail(appointmentId),
     queryFn: () =>
-      apiFetch<{ success: boolean; appointment: AppointmentDetail }>(
-        `/api/doctor/appointments/${appointmentId}`
+      apiFetch<{ success: boolean; appointment: PatientAppointmentDetail }>(
+        `/api/patient/appointments/${appointmentId}`
       ),
     enabled: !!appointmentId,
   });
@@ -38,7 +36,9 @@ export default function AppointmentDetailMain() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-lg font-bold text-[#101828]">Appointment Not Found</p>
-          <p className="text-sm text-[#6A7282] mt-1">No appointment found with ID: {appointmentId}</p>
+          <p className="text-sm text-[#6A7282] mt-1">
+            No appointment found with ID: {appointmentId}
+          </p>
         </div>
       </div>
     );
@@ -48,17 +48,14 @@ export default function AppointmentDetailMain() {
 
   return (
     <div className="space-y-5">
-      <AppointmentHeader appointment={appointment} />
-      <PatientBanner appointment={appointment} />
+      <DetailHeader appointment={appointment} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 space-y-5">
-          <PatientDemographics appointment={appointment} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 max-w-5xl">
+        <div className="lg:col-span-2">
+          <AppointmentInfo appointment={appointment} />
         </div>
-
-        <div className="space-y-5">
-          <TelehealthCard appointment={appointment} />
-          <FinalizeVisit />
+        <div>
+          <DoctorCard appointment={appointment} />
         </div>
       </div>
     </div>

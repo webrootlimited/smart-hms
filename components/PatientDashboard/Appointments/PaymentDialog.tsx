@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CreditCard, CheckCircle2, Lock, Wifi, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -27,11 +27,12 @@ interface Props {
   selectedTime: string;
   reason: string;
   onInvalidate: () => void;
+  onSuccess?: () => void;
 }
 
 export default function PaymentDialog({
   open, onOpenChange, savedCards, selectedCard, setSelectedCard,
-  total, doctorId, doctorName, selectedDate, selectedTime, reason, onInvalidate,
+  total, doctorId, doctorName, selectedDate, selectedTime, reason, onInvalidate, onSuccess,
 }: Props) {
   const queryClient = useQueryClient();
   const [useNewCard, setUseNewCard] = useState(false);
@@ -70,7 +71,8 @@ export default function PaymentDialog({
     onSuccess: (res) => {
       if (res.success) {
         queryClient.invalidateQueries({ queryKey: queryKeys.patientPayments });
-        setConfirmed(true);
+        if (onSuccess) onSuccess();
+        else setConfirmed(true);
       }
     },
   });
@@ -117,10 +119,18 @@ export default function PaymentDialog({
     onSuccess: (res) => {
       if (res.success) {
         queryClient.invalidateQueries({ queryKey: queryKeys.patientPayments });
-        setConfirmed(true);
+        if (onSuccess) onSuccess();
+        else setConfirmed(true);
       }
     },
   });
+
+  // Auto-fetch setup intent when no saved cards
+  useEffect(() => {
+    if (open && savedCards.length === 0 && !setupSecret && !loadingSetup) {
+      fetchSetupIntent();
+    }
+  }, [open, savedCards.length]);
 
   const handleSwitchToNewCard = () => {
     setUseNewCard(true);

@@ -1,86 +1,63 @@
-import { Phone, Mail, AlertTriangle, UserRound, Hash } from "lucide-react";
-import { AppointmentDetail } from "./types";
-
-const TAG_COLORS: Record<string, { bg: string; color: string }> = {
-  "Allergic: Penicillin": { bg: "bg-[#FEF2F2]", color: "text-[#EF4444]" },
-  "Chronic Condition": { bg: "bg-[#FFF7ED]", color: "text-[#EA580C]" },
-  "VIP Patient": { bg: "bg-[#F0FDF4]", color: "text-[#16A34A]" },
-  "First Visit": { bg: "bg-[#F0F9FF]", color: "text-[#0284C7]" },
-  "Insurance Pending": { bg: "bg-[#FFFBEB]", color: "text-[#D97706]" },
-  "Follow-up Required": { bg: "bg-[#FAF5FF]", color: "text-[#7C3AED]" },
-};
+import { Phone, Mail, AlertTriangle, MapPin, Droplets, CalendarDays } from "lucide-react";
+import type { AppointmentDetail } from "./types";
 
 export default function PatientDemographics({ appointment }: { appointment: AppointmentDetail }) {
   const { patient } = appointment;
 
+  const rows = [
+    patient.phone && { icon: Phone, label: "Phone", value: patient.phone, color: "text-[#16A34A]", bg: "bg-[#F0FDF4]" },
+    patient.email && { icon: Mail, label: "Email", value: patient.email, color: "text-[#0284C7]", bg: "bg-[#F0F9FF]" },
+    patient.dob && {
+      icon: CalendarDays, label: "Date of Birth",
+      value: new Date(patient.dob).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+      color: "text-[#7C3AED]", bg: "bg-[#FAF5FF]",
+    },
+    patient.address?.line1 && {
+      icon: MapPin, label: "Address",
+      value: [patient.address.line1, patient.address.line2, patient.address.city, patient.address.postcode].filter(Boolean).join(", "),
+      color: "text-[#EA580C]", bg: "bg-[#FFF7ED]",
+    },
+    patient.blood_group && { icon: Droplets, label: "Blood Group", value: patient.blood_group, color: "text-[#EF4444]", bg: "bg-[#FEF2F2]" },
+  ].filter(Boolean) as { icon: typeof Phone; label: string; value: string; color: string; bg: string }[];
+
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-      <h3 className="text-sm font-bold text-[#101828] mb-4">Patient Demographics</h3>
+      <h3 className="text-sm font-bold text-[#101828] mb-4">Patient Information</h3>
 
-      {/* Name + ID row */}
-      <div className="flex items-center gap-4 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#E5E7EB] flex items-center justify-center">
-            <span className="text-sm font-bold text-[#4A5565]">{patient.avatar}</span>
-          </div>
-          <div>
-            <p className="text-sm font-bold text-[#101828]">{patient.name}</p>
-            <p className="text-xs text-[#6A7282]">{patient.age} years old, {patient.gender}</p>
-          </div>
+      {rows.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {rows.map((row) => (
+            <div key={row.label} className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg ${row.bg} flex items-center justify-center shrink-0`}>
+                <row.icon className={`w-4 h-4 ${row.color}`} />
+              </div>
+              <div>
+                <p className="text-[10px] text-[#6A7282]">{row.label}</p>
+                <p className="text-xs font-medium text-[#101828]">{row.value}</p>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="flex items-center gap-1.5 ml-auto">
-          <Hash className="w-3.5 h-3.5 text-[#6A7282]" />
-          <div>
-            <p className="text-[10px] text-[#6A7282]">Patient ID</p>
-            <p className="text-xs font-semibold text-[#101828]">{patient.patientId}</p>
-          </div>
-        </div>
-      </div>
+      ) : (
+        <p className="text-xs text-[#6A7282]">No patient information available</p>
+      )}
 
-      {/* Contact info */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#F0FDF4] flex items-center justify-center shrink-0">
-            <Phone className="w-3.5 h-3.5 text-[#16A34A]" />
-          </div>
-          <div>
-            <p className="text-[10px] text-[#6A7282]">Contact</p>
-            <p className="text-xs font-medium text-[#101828]">{patient.phone}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#F0F9FF] flex items-center justify-center shrink-0">
-            <Mail className="w-3.5 h-3.5 text-[#0284C7]" />
-          </div>
-          <div>
-            <p className="text-[10px] text-[#6A7282]">Email</p>
-            <p className="text-xs font-medium text-[#101828]">{patient.email}</p>
+      {/* Emergency Contact */}
+      {patient.emergencyContact && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#FEF2F2] flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-4 h-4 text-[#EF4444]" />
+            </div>
+            <div>
+              <p className="text-[10px] text-[#6A7282]">Emergency Contact</p>
+              <p className="text-xs font-medium text-[#101828]">
+                {patient.emergencyContact.name} ({patient.emergencyContact.relationship}) — {patient.emergencyContact.phone}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Emergency contact */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-7 h-7 rounded-lg bg-[#FEF2F2] flex items-center justify-center shrink-0">
-          <AlertTriangle className="w-3.5 h-3.5 text-[#EF4444]" />
-        </div>
-        <div>
-          <p className="text-[10px] text-[#6A7282]">Emergency Contact</p>
-          <p className="text-xs font-medium text-[#101828]">{patient.emergencyContact}</p>
-        </div>
-      </div>
-
-      {/* Tags */}
-      <div className="flex flex-wrap gap-1.5">
-        {patient.tags.map((tag) => {
-          const colors = TAG_COLORS[tag] || { bg: "bg-gray-100", color: "text-[#4A5565]" };
-          return (
-            <span key={tag} className={`px-2.5 py-1 text-[11px] font-medium rounded-full ${colors.bg} ${colors.color}`}>
-              {tag}
-            </span>
-          );
-        })}
-      </div>
+      )}
     </div>
   );
 }
