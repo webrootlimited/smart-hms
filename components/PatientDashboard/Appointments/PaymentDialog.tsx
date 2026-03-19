@@ -26,13 +26,16 @@ interface Props {
   selectedDate: Date;
   selectedTime: string;
   reason: string;
+  appointmentType?: "ONLINE" | "PHYSICAL";
+  clinicId?: string;
   onInvalidate: () => void;
   onSuccess?: () => void;
 }
 
 export default function PaymentDialog({
   open, onOpenChange, savedCards, selectedCard, setSelectedCard,
-  total, doctorId, doctorName, selectedDate, selectedTime, reason, onInvalidate, onSuccess,
+  total, doctorId, doctorName, selectedDate, selectedTime, reason,
+  appointmentType = "ONLINE", clinicId, onInvalidate, onSuccess,
 }: Props) {
   const queryClient = useQueryClient();
   const [useNewCard, setUseNewCard] = useState(false);
@@ -65,7 +68,8 @@ export default function PaymentDialog({
           card_id: selectedCard,
           scheduled_at: buildScheduledAt(),
           reason,
-          appointment_type: "ONLINE",
+          appointment_type: appointmentType,
+          ...(clinicId ? { clinic_id: clinicId } : {}),
         }
       ),
     onSuccess: (res) => {
@@ -112,7 +116,8 @@ export default function PaymentDialog({
           card_id: saveRes.card.id,
           scheduled_at: buildScheduledAt(),
           reason,
-          appointment_type: "ONLINE",
+          appointment_type: appointmentType,
+          ...(clinicId ? { clinic_id: clinicId } : {}),
         }
       );
     },

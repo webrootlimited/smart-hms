@@ -11,6 +11,7 @@ import {
   FileText,
   Bell,
   Settings,
+  Wallet,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { label: "Patients", icon: UserRound, segment: "patients" },
   { label: "Telehealth", icon: Video, segment: "telehealth" },
   { label: "Messages", icon: MessageSquare, segment: "messages" },
+  { label: "Payments", icon: Wallet, segment: "payments" },
   { label: "Documents", icon: FileText, segment: "documents" },
   { label: "Notifications", icon: Bell, segment: "notifications" },
   { label: "Settings", icon: Settings, segment: "settings" },

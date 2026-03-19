@@ -37,6 +37,7 @@ export interface DoctorProfile {
   address: string;
   department: string;
   online_consultation: boolean;
+  offline_consultation: boolean;
   photo_url: string;
   status: string;
   license_number: string;

@@ -16,9 +16,8 @@ import { queryKeys } from "@/lib/queryKeys";
 import PaymentCards from "./PaymentCards";
 import RecentPayments from "./RecentPayments";
 
-interface SavedCard {
-  id: string;
-}
+interface SavedCard { id: string; }
+interface PaymentItem { amount: number; status: string; }
 
 export default function PaymentsMain({ onBack }: { onBack?: () => void }) {
   const params = useParams();
@@ -32,10 +31,20 @@ export default function PaymentsMain({ onBack }: { onBack?: () => void }) {
     },
   });
 
+  const { data: payments = [] } = useQuery<PaymentItem[]>({
+    queryKey: queryKeys.patientPayments,
+    queryFn: async () => {
+      const res = await apiFetch<{ success: boolean; payments: PaymentItem[] }>("/api/patient/payments/history");
+      return res.payments;
+    },
+  });
+
+  const totalSpent = payments.filter((p) => p.status === "COMPLETED").reduce((sum, p) => sum + p.amount, 0);
+
   const stats = [
     {
-      label: "Current Balance",
-      value: "£0.00",
+      label: "Total Spent",
+      value: `£${totalSpent.toFixed(2)}`,
       icon: Wallet,
       color: "#16A34A",
       bg: "bg-[#F0FDF4]",
@@ -48,11 +57,11 @@ export default function PaymentsMain({ onBack }: { onBack?: () => void }) {
       bg: "bg-[#F0F9FF]",
     },
     {
-      label: "Past Due",
-      value: "£145.00",
+      label: "Total Payments",
+      value: String(payments.length),
       icon: AlertCircle,
-      color: "#EF4444",
-      bg: "bg-[#FEF2F2]",
+      color: "#7C3AED",
+      bg: "bg-[#F5F3FF]",
     },
   ];
 

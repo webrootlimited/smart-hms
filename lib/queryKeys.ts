@@ -5,6 +5,7 @@ export const queryKeys = {
   patientProfile: ["patient", "profile"] as const,
   patientCards: ["patient", "cards"] as const,
   onlineDoctors: (search: string) => ["online-doctors", search] as const,
+  offlineDoctors: (params: Record<string, string | number>) => ["offline-doctors", params] as const,
   onlineSlots: (doctorId: string, date: string) => ["online-slots", doctorId, date] as const,
   patientPayments: ["patient", "payments"] as const,
   doctorPayments: ["doctor", "payments"] as const,
@@ -18,6 +19,8 @@ export const queryKeys = {
     ["doctor", "appointments", params] as const,
   doctorAppointmentDetail: (id: string) =>
     ["doctor", "appointment", id] as const,
+  doctorPatients: (params: Record<string, string | number>) =>
+    ["doctor", "patients", params] as const,
   patientAppointmentDetail: (id: string) =>
     ["patient", "appointment", id] as const,
   conversations: ["conversations"] as const,

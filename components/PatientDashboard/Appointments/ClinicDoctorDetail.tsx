@@ -13,16 +13,18 @@ export default function ClinicDoctorDetail({
   return (
     <SelectClinicDateSlot
       doctor={{
+        id: doctor.id,
         name: doctor.name,
-        avatar: doctor.avatar,
+        initials: doctor.initials,
         specialty: doctor.specialty,
-        specialtyColor: doctor.specialtyColor,
         consultFee: doctor.consultFee,
+        photo_url: doctor.photo_url,
       }}
-      clinic={{
-        name: doctor.clinic,
-        address: doctor.clinicAddress,
-      }}
+      clinic={doctor.clinic ? {
+        id: doctor.clinic.id,
+        name: doctor.clinic.name,
+        address: doctor.clinic.address,
+      } : null}
       onBack={onBack}
     />
   );
