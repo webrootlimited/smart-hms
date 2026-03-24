@@ -101,8 +101,19 @@ export default function ClinicDetail({
   if (selectedDoc) {
     return (
       <SelectClinicDateSlot
-        doctor={selectedDoc}
-        clinic={clinic}
+        doctor={{
+          id: String(selectedDoc.id),
+          name: selectedDoc.name,
+          initials: selectedDoc.avatar,
+          specialty: selectedDoc.specialty,
+          consultFee: selectedDoc.consultFee,
+          photo_url: "",
+        }}
+        clinic={{
+          id: String(clinic.id),
+          name: clinic.name,
+          address: clinic.address,
+        }}
         onBack={() => setSelectedDoc(null)}
       />
     );
