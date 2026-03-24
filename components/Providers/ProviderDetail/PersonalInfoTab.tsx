@@ -1,19 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { User, Mail, Phone, AlertCircle, MapPin, Pencil } from "lucide-react";
-import {
-  EditBasicInfoDialog,
-  EditContactDialog,
-  EditBioDialog,
-} from "./ProviderEditDialogs";
+import { User, Mail, Phone, MapPin, Briefcase, Calendar, Pencil } from "lucide-react";
+import type { DoctorDetail } from "./types";
+import { EditBasicInfoDialog, EditContactDialog, EditProfessionalDialog } from "./EditDoctorDialogs";
 
-type Data = typeof import("./detailData").providerDetail;
-
-export default function PersonalInfoTab({ data }: { data: Data }) {
+export default function PersonalInfoTab({
+  doctor,
+  onUpdate,
+  saving,
+}: {
+  doctor: DoctorDetail;
+  onUpdate: (body: Record<string, unknown>) => void;
+  saving: boolean;
+}) {
   const [editBasic, setEditBasic] = useState(false);
   const [editContact, setEditContact] = useState(false);
-  const [editBio, setEditBio] = useState(false);
+  const [editProfessional, setEditProfessional] = useState(false);
+
+  const age = doctor.dob
+    ? Math.floor((Date.now() - new Date(doctor.dob).getTime()) / 31557600000)
+    : null;
+
+  const genderLabel =
+    doctor.gender === "MALE" ? "Male" : doctor.gender === "FEMALE" ? "Female" : doctor.gender || "—";
+
+  const joinDate = doctor.joined_at
+    ? new Date(doctor.joined_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+    : "—";
+
+  const dobFormatted = doctor.dob
+    ? new Date(doctor.dob).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+    : "—";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -22,9 +40,7 @@ export default function PersonalInfoTab({ data }: { data: Data }) {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-[#0284C7]" />
-            <h2 className="text-base font-bold text-[#101828]">
-              Basic Information
-            </h2>
+            <h2 className="text-base font-bold text-[#101828]">Basic Information</h2>
           </div>
           <button onClick={() => setEditBasic(true)} className="p-2 rounded-lg hover:bg-gray-50 transition cursor-pointer">
             <Pencil className="w-4 h-4 text-[#6A7282]" />
@@ -32,21 +48,14 @@ export default function PersonalInfoTab({ data }: { data: Data }) {
         </div>
         <div className="space-y-4">
           {[
-            { label: "Full Name", value: data.fullName },
-            { label: "Date of Birth", value: data.dateOfBirth },
-            { label: "Gender", value: data.gender },
-            { label: "Age", value: `${data.age} years` },
-            { label: "Employee ID", value: data.employeeId, badge: true },
+            { label: "Full Name", value: `Dr. ${doctor.first_name} ${doctor.last_name}` },
+            { label: "Date of Birth", value: dobFormatted },
+            { label: "Gender", value: genderLabel },
+            ...(age !== null ? [{ label: "Age", value: `${age} years` }] : []),
           ].map((row) => (
             <div key={row.label} className="flex items-center justify-between py-1">
               <span className="text-sm text-[#6A7282]">{row.label}</span>
-              {row.badge ? (
-                <span className="px-2.5 py-0.5 text-sm font-semibold bg-[#EFF6FF] text-[#0284C7] rounded-lg">
-                  {row.value}
-                </span>
-              ) : (
-                <span className="text-sm font-semibold text-[#101828]">{row.value}</span>
-              )}
+              <span className="text-sm font-semibold text-[#101828]">{row.value}</span>
             </div>
           ))}
         </div>
@@ -65,10 +74,9 @@ export default function PersonalInfoTab({ data }: { data: Data }) {
         </div>
         <div className="space-y-3">
           {[
-            { icon: Mail, label: "Email Address", value: data.email, bg: "bg-[#EFF6FF]", color: "text-[#0284C7]" },
-            { icon: Phone, label: "Phone Number", value: data.phone, bg: "bg-[#F0FDF4]", color: "text-[#16A34A]" },
-            { icon: AlertCircle, label: "Emergency Contact", value: data.emergencyContact, bg: "bg-[#FFFBEB]", color: "text-[#D97706]" },
-            { icon: MapPin, label: "Home Address", value: data.address, bg: "bg-[#FEF2F2]", color: "text-[#EF4444]" },
+            { icon: Mail, label: "Email Address", value: doctor.email, bg: "bg-[#EFF6FF]", color: "text-[#0284C7]" },
+            { icon: Phone, label: "Phone Number", value: doctor.phone || "Not provided", bg: "bg-[#F0FDF4]", color: "text-[#16A34A]" },
+            { icon: MapPin, label: "Address", value: doctor.address || "Not provided", bg: "bg-[#FEF2F2]", color: "text-[#EF4444]" },
           ].map((item) => (
             <div key={item.label} className={`p-3.5 rounded-xl ${item.bg}`}>
               <div className="flex items-center gap-1.5 mb-1">
@@ -83,65 +91,66 @@ export default function PersonalInfoTab({ data }: { data: Data }) {
 
       {/* Professional Details */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <div className="flex items-center gap-2 mb-5">
-          <User className="w-4 h-4 text-[#0284C7]" />
-          <h2 className="text-base font-bold text-[#101828]">Professional Details</h2>
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <Briefcase className="w-4 h-4 text-[#0284C7]" />
+            <h2 className="text-base font-bold text-[#101828]">Professional Details</h2>
+          </div>
+          <button onClick={() => setEditProfessional(true)} className="p-2 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+            <Pencil className="w-4 h-4 text-[#6A7282]" />
+          </button>
         </div>
         <div className="space-y-4">
           <div className="flex items-center justify-between py-1">
             <span className="text-sm text-[#6A7282]">Specialty</span>
             <span className="px-2.5 py-0.5 text-sm font-semibold bg-[#EFF6FF] text-[#0284C7] rounded-lg">
-              {data.specialty}
+              {doctor.specialization || "—"}
             </span>
           </div>
           {[
-            { label: "Department", value: data.department },
-            { label: "Years of Experience", value: `${data.yearsOfExperience} years` },
-            { label: "Join Date", value: data.joinDate },
+            { label: "Department", value: doctor.department || "—" },
+            { label: "Experience", value: `${doctor.experience_years} years` },
+            { label: "Consultation Fee", value: `£${doctor.consultation_fee}` },
+            { label: "Joined", value: joinDate },
           ].map((row) => (
             <div key={row.label} className="flex items-center justify-between py-1">
               <span className="text-sm text-[#6A7282]">{row.label}</span>
               <span className="text-sm font-semibold text-[#101828]">{row.value}</span>
             </div>
           ))}
-          <div className="flex items-center justify-between py-1">
-            <span className="text-sm text-[#6A7282]">Employment Status</span>
-            <span className="flex items-center gap-1.5 text-sm font-semibold text-[#16A34A]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A]" />
-              {data.employmentStatus}
-            </span>
-          </div>
         </div>
       </div>
 
-      {/* Professional Bio */}
+      {/* Bio + Stats */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-[#0284C7]" />
-            <h2 className="text-base font-bold text-[#101828]">Professional Bio</h2>
-          </div>
-          <button onClick={() => setEditBio(true)} className="p-2 rounded-lg hover:bg-gray-50 transition cursor-pointer">
-            <Pencil className="w-4 h-4 text-[#6A7282]" />
-          </button>
+        <div className="flex items-center gap-2 mb-4">
+          <Calendar className="w-4 h-4 text-[#0284C7]" />
+          <h2 className="text-base font-bold text-[#101828]">Professional Bio</h2>
         </div>
-        <p className="text-sm text-[#4A5565] leading-relaxed mb-4">{data.bio}</p>
-        <div className="p-3 bg-[#FAF5FF] rounded-xl">
-          <p className="text-xs font-semibold text-[#7C3AED] mb-2">Specializations</p>
-          <div className="flex flex-wrap gap-2">
-            {data.specializations.map((s) => (
-              <span key={s} className="px-2.5 py-1 text-xs font-medium bg-white text-[#7C3AED] rounded-lg border border-[#7C3AED]/20">
-                {s}
-              </span>
-            ))}
-          </div>
+        {doctor.bio ? (
+          <p className="text-sm text-[#4A5565] leading-relaxed">{doctor.bio}</p>
+        ) : (
+          <p className="text-sm text-[#6A7282] italic">No bio provided</p>
+        )}
+        <div className="grid grid-cols-2 gap-3 mt-5">
+          {[
+            { label: "Total Patients", value: doctor.stats.totalPatients, bg: "bg-[#EFF6FF]", color: "text-[#0284C7]" },
+            { label: "Completed", value: doctor.stats.completedAppointments, bg: "bg-[#F0FDF4]", color: "text-[#16A34A]" },
+            { label: "Upcoming", value: doctor.stats.upcomingAppointments, bg: "bg-[#FFFBEB]", color: "text-[#D97706]" },
+            { label: "Cancelled", value: doctor.stats.cancelledAppointments, bg: "bg-[#FEF2F2]", color: "text-[#EF4444]" },
+          ].map((s) => (
+            <div key={s.label} className={`p-3 rounded-xl ${s.bg}`}>
+              <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+              <p className="text-xs text-[#6A7282]">{s.label}</p>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Dialogs */}
-      <EditBasicInfoDialog open={editBasic} onClose={() => setEditBasic(false)} data={data} />
-      <EditContactDialog open={editContact} onClose={() => setEditContact(false)} data={data} />
-      <EditBioDialog open={editBio} onClose={() => setEditBio(false)} data={data} />
+      <EditBasicInfoDialog open={editBasic} onClose={() => setEditBasic(false)} doctor={doctor} onSave={onUpdate} saving={saving} />
+      <EditContactDialog open={editContact} onClose={() => setEditContact(false)} doctor={doctor} onSave={onUpdate} saving={saving} />
+      <EditProfessionalDialog open={editProfessional} onClose={() => setEditProfessional(false)} doctor={doctor} onSave={onUpdate} saving={saving} />
     </div>
   );
 }

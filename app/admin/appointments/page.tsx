@@ -1,5 +1,5 @@
-import AppointmentTypesMain from "@/components/Appointments/AppointmentTypesMain";
+import AdminAppointmentsMain from "@/components/Appointments/AdminAppointmentsMain";
 
 export default function AppointmentsPage() {
-  return <AppointmentTypesMain />;
+  return <AdminAppointmentsMain />;
 }

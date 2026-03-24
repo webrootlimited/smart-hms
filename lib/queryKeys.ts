@@ -13,6 +13,14 @@ export const queryKeys = {
     ["admin", "patients", params] as const,
   adminDoctors: (params: Record<string, string | number>) =>
     ["admin", "doctors", params] as const,
+  adminAppointments: (params: Record<string, string | number>) =>
+    ["admin", "appointments", params] as const,
+  adminDoctorDetail: (id: string) =>
+    ["admin", "doctor", id] as const,
+  adminPatientDetail: (id: string) =>
+    ["admin", "patient", id] as const,
+  adminAppointmentDetail: (id: string) =>
+    ["admin", "appointment", id] as const,
   patientAppointments: (status: string, search: string) =>
     ["patient", "appointments", status, search] as const,
   doctorAppointments: (params: Record<string, string>) =>

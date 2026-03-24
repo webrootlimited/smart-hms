@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Phone,
   Mail,
@@ -139,9 +140,12 @@ export default function PatientCard({ patient }: { patient: Patient }) {
       {/* Actions */}
       <div className="flex items-center justify-end pt-3 border-t border-gray-100">
         <div className="flex items-center gap-1.5">
-          <button className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[#0284C7] text-white rounded-lg hover:opacity-90 transition cursor-pointer">
+          <Link
+            href={`/admin/patients/${patient.id}`}
+            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[#0284C7] text-white rounded-lg hover:opacity-90 transition"
+          >
             <Eye className="w-3 h-3" /> View Details
-          </button>
+          </Link>
           <button className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold border border-gray-200 rounded-lg hover:bg-gray-50 transition cursor-pointer">
             <Pencil className="w-3 h-3" /> Edit Profile
           </button>

@@ -7,6 +7,7 @@ import {
   Mail,
   Eye,
 } from "lucide-react";
+import Link from "next/link";
 import type { Patient } from "./types";
 import PatientCard from "./PatientCard";
 
@@ -188,9 +189,12 @@ export default function PatientsGrid({
                       {formatDate(p.createdAt)}
                     </td>
                     <td className="px-3 py-3">
-                      <button className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[#0284C7] text-white rounded-lg hover:opacity-90 transition cursor-pointer">
+                      <Link
+                        href={`/admin/patients/${p.id}`}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[#0284C7] text-white rounded-lg hover:opacity-90 transition"
+                      >
                         <Eye className="w-3 h-3" /> View
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))}

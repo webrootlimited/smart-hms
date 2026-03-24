@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Stethoscope,
 } from "lucide-react";
+import Link from "next/link";
 import type { Provider } from "./types";
 import ProviderCard from "./ProviderCard";
 
@@ -132,10 +133,10 @@ export default function ProvidersGrid({
                 {providers.map((p) => (
                   <tr
                     key={p.id}
-                    className="border-t border-gray-50 hover:bg-gray-50/50 transition"
+                    className="border-t border-gray-50 hover:bg-gray-50/50 transition cursor-pointer"
                   >
                     <td className="px-3 py-3">
-                      <div className="flex items-center gap-3">
+                      <Link href={`/admin/providers/${p.id}`} className="flex items-center gap-3">
                         {p.photo_url ? (
                           <img
                             src={p.photo_url}
@@ -157,7 +158,7 @@ export default function ProvidersGrid({
                             <p className="text-xs text-[#6A7282]">{p.email}</p>
                           )}
                         </div>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-3 py-3">
                       <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[#EFF6FF] text-[#0284C7]">
