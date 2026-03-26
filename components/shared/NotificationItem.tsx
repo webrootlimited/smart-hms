@@ -3,16 +3,18 @@
 import { CalendarDays, CreditCard, MessageSquare, Bell, Clock, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+export type NotificationType = "APPOINTMENT" | "BILLING" | "MESSAGE" | "SYSTEM" | "REMINDER";
+
 export interface Notification {
   _id: string;
-  type: "APPOINTMENT" | "BILLING" | "MESSAGE" | "SYSTEM" | "REMINDER";
+  type: string;
   title: string;
   message: string;
   read: boolean;
   createdAt: string;
 }
 
-const typeIcons: Record<Notification["type"], React.ElementType> = {
+const typeIcons: Record<string, React.ElementType> = {
   APPOINTMENT: CalendarDays,
   BILLING: CreditCard,
   MESSAGE: MessageSquare,
@@ -20,7 +22,7 @@ const typeIcons: Record<Notification["type"], React.ElementType> = {
   REMINDER: Clock,
 };
 
-const typeBg: Record<Notification["type"], string> = {
+const typeBg: Record<string, string> = {
   APPOINTMENT: "bg-[#F0F9FF] text-[#0284C7]",
   BILLING: "bg-[#F0FDF4] text-[#16A34A]",
   MESSAGE: "bg-[#F5F3FF] text-[#7C3AED]",
