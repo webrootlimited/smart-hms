@@ -1,5 +1,5 @@
-import NotificationsMain from "@/components/Notifications/NotificationsMain";
+import NotificationList from "@/components/shared/NotificationList";
 
-export default function NotificationsPage() {
-  return <NotificationsMain />;
+export default function AdminNotificationsPage() {
+  return <NotificationList role="admin" basePath="/admin" />;
 }

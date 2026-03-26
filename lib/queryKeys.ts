@@ -34,4 +34,8 @@ export const queryKeys = {
   conversations: ["conversations"] as const,
   messages: (conversationId: string) =>
     ["messages", conversationId] as const,
+  notifications: (role: string, params: Record<string, string | number>) =>
+    ["notifications", role, params] as const,
+  unreadNotificationCount: (role: string) =>
+    ["notifications", role, "unread-count"] as const,
 };

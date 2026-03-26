@@ -9,6 +9,7 @@ import {
   Pill,
   FileText,
   Video,
+  Bell,
   CreditCard,
   Settings,
   Headphones,
@@ -21,6 +22,7 @@ const navItems = [
   { label: "Prescriptions", icon: Pill, segment: "prescriptions" },
   { label: "Medical Records", icon: FileText, segment: "medical-records" },
   { label: "Telehealth", icon: Video, segment: "telehealth" },
+  { label: "Notifications", icon: Bell, segment: "notifications" },
   { label: "Payments", icon: CreditCard, segment: "payments" },
   { label: "Settings", icon: Settings, segment: "settings" },
 ];

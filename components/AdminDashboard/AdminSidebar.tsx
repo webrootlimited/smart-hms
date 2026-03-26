@@ -11,7 +11,7 @@ import {
   FileBarChart,
   Stethoscope,
   Bell,
-  DollarSign,
+
   Activity,
   ClipboardList,
   Settings,
@@ -27,7 +27,7 @@ const navItems = [
   { label: "User Management", icon: UserCog, href: "/admin/user-management" },
   { label: "Clinic Settings", icon: Settings, href: "/admin/clinic-settings" },
   { label: "Notifications", icon: Bell, href: "/admin/notifications" },
-  { label: "Billing Rules", icon: DollarSign, href: "/admin/billing-rules" },
+
   { label: "Analytics", icon: Activity, href: "/admin/analytics" },
   { label: "Activity Logs", icon: ClipboardList, href: "/admin/activity" },
   { label: "Settings", icon: Settings, href: "/admin/settings" },

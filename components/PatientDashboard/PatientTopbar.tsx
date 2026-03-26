@@ -1,7 +1,8 @@
 "use client";
 
-import { Search, Bell, PanelLeftOpen, PanelLeftClose } from "lucide-react";
+import { Search, PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import ProfileDropdown from "@/components/utils/ProfileDropdown";
+import NotificationBell from "@/components/shared/NotificationBell";
 import { useParams } from "next/navigation";
 
 function formatPatientName(slug: string): string {
@@ -67,12 +68,7 @@ export default function PatientTopbar({
         </div>
 
         {/* Notification bell */}
-        <button className="relative w-9 h-9 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition">
-          <Bell className="w-4 h-4 text-[#64748B]" />
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-semibold">
-            3
-          </span>
-        </button>
+        <NotificationBell notificationsPath={`/patient/${params.patientName}/notifications`} />
 
         {/* Profile */}
         <ProfileDropdown
