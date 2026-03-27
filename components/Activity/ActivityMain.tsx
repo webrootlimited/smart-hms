@@ -1,50 +1,61 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Search, Download } from "lucide-react";
+import { useState } from "react";
+import { Search, Download, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
 import ActivityHeader from "./ActivityHeader";
 import ActivityTimeline from "./ActivityTimeline";
-import { CATEGORIES, ACTIVITY_LOGS } from "./mockData";
+import { ActivityLogsResponse } from "./types";
 
-const PER_PAGE = 6;
+const CATEGORIES = ["All Activity", "Login", "Admin", "System", "Patient", "Appointment"];
+const PER_PAGE = 10;
 
 export default function ActivityMain() {
   const [activeCategory, setActiveCategory] = useState("All Activity");
   const [search, setSearch] = useState("");
-  const [visibleCount, setVisibleCount] = useState(PER_PAGE);
+  const [searchDebounce, setSearchDebounce] = useState("");
+  const [page, setPage] = useState(1);
+  const [debounceTimer, setDebounceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
 
-  const filtered = useMemo(() => {
-    let logs = ACTIVITY_LOGS;
-    if (activeCategory !== "All Activity") {
-      const key = activeCategory.toLowerCase();
-      logs = logs.filter((l) => l.category === key);
-    }
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      logs = logs.filter(
-        (l) =>
-          l.action.toLowerCase().includes(q) ||
-          l.description.toLowerCase().includes(q) ||
-          l.user.toLowerCase().includes(q)
-      );
-    }
-    return logs;
-  }, [activeCategory, search]);
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    if (debounceTimer) clearTimeout(debounceTimer);
+    setDebounceTimer(
+      setTimeout(() => {
+        setSearchDebounce(value);
+        setPage(1);
+      }, 300)
+    );
+  };
 
-  const visible = filtered.slice(0, visibleCount);
+  const categoryParam = activeCategory === "All Activity" ? "" : activeCategory.toLowerCase();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["activityLogs", categoryParam, searchDebounce, page],
+    queryFn: async () => {
+      const params = new URLSearchParams({ page: String(page), limit: String(PER_PAGE) });
+      if (categoryParam) params.set("category", categoryParam);
+      if (searchDebounce.trim()) params.set("search", searchDebounce.trim());
+      return apiFetch<ActivityLogsResponse>(`/api/admin/activity-logs?${params}`);
+    },
+  });
+
+  const logs = data?.logs ?? [];
+  const stats = data?.stats;
+  const pagination = data?.pagination;
 
   return (
     <div className="space-y-5">
-      <ActivityHeader />
+      <ActivityHeader stats={stats} />
 
       {/* Filters row */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        {/* Category tabs */}
         <div className="flex items-center gap-1 bg-white rounded-xl border border-gray-100 p-1 shadow-sm overflow-x-auto">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
-              onClick={() => { setActiveCategory(cat); setVisibleCount(PER_PAGE); }}
+              onClick={() => { setActiveCategory(cat); setPage(1); }}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap transition cursor-pointer ${
                 activeCategory === cat
                   ? "bg-[#0284C7] text-white"
@@ -56,7 +67,6 @@ export default function ActivityMain() {
           ))}
         </div>
 
-        {/* Search + Export */}
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
@@ -64,7 +74,7 @@ export default function ActivityMain() {
               type="text"
               placeholder="Search logs..."
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setVisibleCount(PER_PAGE); }}
+              onChange={(e) => handleSearch(e.target.value)}
               className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7] w-56"
             />
           </div>
@@ -75,22 +85,39 @@ export default function ActivityMain() {
       </div>
 
       {/* Timeline */}
-      {visible.length > 0 ? (
-        <ActivityTimeline logs={visible} />
-      ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 shadow-sm text-center">
-          <p className="text-sm text-[#6A7282]">No activity logs found</p>
-        </div>
-      )}
+      <div className="min-h-50">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 text-[#0284C7] animate-spin" />
+          </div>
+        ) : logs.length > 0 ? (
+          <ActivityTimeline logs={logs} />
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 p-12 shadow-sm text-center">
+            <p className="text-sm text-[#6A7282]">No activity logs found</p>
+          </div>
+        )}
+      </div>
 
-      {/* Load More */}
-      {visibleCount < filtered.length && (
-        <div className="flex justify-center">
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-2">
           <button
-            onClick={() => setVisibleCount((c) => c + PER_PAGE)}
-            className="px-6 py-2.5 text-sm font-semibold text-[#0284C7] border border-[#0284C7] rounded-xl hover:bg-[#F0F9FF] transition cursor-pointer"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="px-3 py-1.5 text-xs font-medium text-[#4A5565] bg-gray-50 hover:bg-gray-100 rounded-lg transition disabled:opacity-40 cursor-pointer"
           >
-            Load More Events
+            Previous
+          </button>
+          <span className="text-xs text-[#6A7282]">
+            Page {page} of {pagination.totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+            disabled={page >= pagination.totalPages}
+            className="px-3 py-1.5 text-xs font-medium text-[#4A5565] bg-gray-50 hover:bg-gray-100 rounded-lg transition disabled:opacity-40 cursor-pointer"
+          >
+            Next
           </button>
         </div>
       )}

@@ -1,3 +1,4 @@
+import { formatTimeAgo } from "@/components/shared/NotificationItem";
 import { ActivityLog } from "./types";
 import {
   LogIn,
@@ -17,7 +18,11 @@ const CATEGORY_CONFIG: Record<string, { icon: typeof LogIn; color: string; bg: s
   system: { icon: Server, color: "text-[#EA580C]", bg: "bg-[#FFF7ED]" },
   patient: { icon: UserRound, color: "text-[#0891B2]", bg: "bg-[#ECFEFF]" },
   appointment: { icon: CalendarDays, color: "text-[#16A34A]", bg: "bg-[#F0FDF4]" },
+  payment: { icon: Server, color: "text-[#D97706]", bg: "bg-[#FFFBEB]" },
 };
+
+const DEFAULT_CATEGORY = { icon: Server, color: "text-[#6A7282]", bg: "bg-gray-100" };
+const DEFAULT_SEVERITY = { icon: Info, color: "text-[#6A7282]", bg: "bg-gray-100", label: "Info" };
 
 const SEVERITY_CONFIG: Record<string, { icon: typeof Info; color: string; bg: string; label: string }> = {
   info: { icon: Info, color: "text-[#0284C7]", bg: "bg-[#F0F9FF]", label: "Info" },
@@ -30,8 +35,8 @@ export default function ActivityTimeline({ logs }: { logs: ActivityLog[] }) {
   return (
     <div className="space-y-3">
       {logs.map((log) => {
-        const cat = CATEGORY_CONFIG[log.category];
-        const sev = SEVERITY_CONFIG[log.severity];
+        const cat = CATEGORY_CONFIG[log.category] || DEFAULT_CATEGORY;
+        const sev = SEVERITY_CONFIG[log.severity] || DEFAULT_SEVERITY;
         const CatIcon = cat.icon;
         const SevIcon = sev.icon;
 
@@ -67,7 +72,7 @@ export default function ActivityTimeline({ logs }: { logs: ActivityLog[] }) {
             </div>
 
             {/* Timestamp */}
-            <span className="text-[11px] text-[#6A7282] whitespace-nowrap shrink-0">{log.timestamp}</span>
+            <span className="text-[11px] text-[#6A7282] whitespace-nowrap shrink-0">{formatTimeAgo(log.timestamp)}</span>
           </div>
         );
       })}

@@ -6,6 +6,24 @@ export interface ActivityLog {
   action: string;
   description: string;
   timestamp: string;
-  category: "login" | "admin" | "system" | "patient" | "appointment";
-  severity: "info" | "warning" | "success" | "error";
+  category: string;
+  severity: string;
+}
+
+export interface ActivityStats {
+  total: number;
+  today: number;
+  uniqueUsers: number;
+}
+
+export interface ActivityLogsResponse {
+  success: boolean;
+  logs: ActivityLog[];
+  stats: ActivityStats;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
