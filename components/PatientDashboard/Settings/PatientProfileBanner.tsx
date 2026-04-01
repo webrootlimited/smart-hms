@@ -1,6 +1,9 @@
 "use client";
 
-import { Camera } from "lucide-react";
+import { useRef } from "react";
+import { Camera, Loader2 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiUpload } from "@/lib/api";
 import { PatientProfile } from "./PatientSettingsMain";
 
 function getInitials(first: string, last: string) {
@@ -10,17 +13,55 @@ function getInitials(first: string, last: string) {
 export default function PatientProfileBanner({ patient }: { patient: PatientProfile | null }) {
   const initials = getInitials(patient?.first_name || "", patient?.last_name || "");
   const fullName = patient ? `${patient.first_name} ${patient.last_name}` : "—";
+  const fileRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => apiUpload("/api/upload/avatar", file, "avatar"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patientProfile"] });
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) uploadMutation.mutate(file);
+    e.target.value = "";
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
       <div className="flex items-center gap-4">
         <div className="relative shrink-0">
-          <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-[#0284C7] to-[#0EA5E9] flex items-center justify-center text-white text-xl font-bold">
-            {initials}
-          </div>
-          <button className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#0284C7] border-2 border-white flex items-center justify-center cursor-pointer hover:opacity-90 transition">
-            <Camera className="w-3 h-3 text-white" />
+          {patient?.photo_url ? (
+            <img
+              src={patient.photo_url}
+              alt={fullName}
+              className="w-16 h-16 rounded-2xl object-cover"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-[#0284C7] to-[#0EA5E9] flex items-center justify-center text-white text-xl font-bold">
+              {initials}
+            </div>
+          )}
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploadMutation.isPending}
+            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#0284C7] border-2 border-white flex items-center justify-center cursor-pointer hover:opacity-90 transition"
+          >
+            {uploadMutation.isPending ? (
+              <Loader2 className="w-3 h-3 text-white animate-spin" />
+            ) : (
+              <Camera className="w-3 h-3 text-white" />
+            )}
           </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleFileChange}
+          />
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-bold text-[#101828]">{fullName}</h2>

@@ -13,6 +13,7 @@ import SignUpDoctorStep from "./SignUpDoctorStep";
 import ApplicationSubmitted from "./ApplicationSubmitted";
 import { setSession } from "@/auth/setSession";
 import instance from "@/utils/instance";
+import { toast } from "sonner";
 import type { SignUpData } from "./types";
 
 const initialData: SignUpData = {
@@ -40,7 +41,6 @@ export default function SignUpForm({
   const router = useRouter();
   const [direction, setDirection] = useState(1);
   const [data, setData] = useState<SignUpData>(initialData);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const goTo = (next: number) => {
@@ -61,8 +61,7 @@ export default function SignUpForm({
   };
 
   const handlePatientRegister = async () => {
-    setError("");
-    setLoading(true);
+        setLoading(true);
 
     try {
       const { data: res } = await instance.post("/api/auth/register/patient", {
@@ -75,7 +74,7 @@ export default function SignUpForm({
       });
 
       if (!res.success) {
-        setError(res.message || "Registration failed");
+        toast.error(res.message || "Registration failed");
         setLoading(false);
         return;
       }
@@ -85,9 +84,7 @@ export default function SignUpForm({
       setLoading(false);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(
-        axiosErr.response?.data?.message || "Unable to connect to server"
-      );
+      toast.error(axiosErr.response?.data?.message || "Unable to connect to server");
       setLoading(false);
     }
   };
@@ -98,23 +95,35 @@ export default function SignUpForm({
     experienceYears: number;
     consultationFee: number;
     bio: string;
+    licenseFile: File | null;
+    certificates: File[];
   }) => {
-    setError("");
-    setLoading(true);
+        setLoading(true);
 
     try {
-      const { data: res } = await instance.post("/api/auth/register/doctor", {
-        fullName: data.fullName,
-        dob: data.dob,
-        phone: data.phone,
-        gender: data.gender,
-        email: data.email,
-        password: data.password,
-        ...doctorData,
+      const { licenseFile, certificates, ...rest } = doctorData;
+
+      const formData = new FormData();
+      formData.append("fullName", data.fullName);
+      formData.append("dob", data.dob);
+      formData.append("phone", data.phone);
+      formData.append("gender", data.gender);
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+      formData.append("specialization", rest.specialization);
+      formData.append("licenseNumber", rest.licenseNumber);
+      formData.append("experienceYears", String(rest.experienceYears));
+      formData.append("consultationFee", String(rest.consultationFee));
+      formData.append("bio", rest.bio);
+      if (licenseFile) formData.append("license", licenseFile);
+      certificates.forEach((f) => formData.append("certificates", f));
+
+      const { data: res } = await instance.post("/api/auth/register/doctor", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (!res.success) {
-        setError(res.message || "Registration failed");
+        toast.error(res.message || "Registration failed");
         setLoading(false);
         return;
       }
@@ -123,9 +132,7 @@ export default function SignUpForm({
       setLoading(false);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(
-        axiosErr.response?.data?.message || "Unable to connect to server"
-      );
+      toast.error(axiosErr.response?.data?.message || "Unable to connect to server");
       setLoading(false);
     }
   };
@@ -205,12 +212,6 @@ export default function SignUpForm({
             </h2>
           )}
         </div>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
-            {error}
-          </div>
-        )}
 
         <div className="relative overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>

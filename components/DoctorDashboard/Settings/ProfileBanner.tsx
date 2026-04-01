@@ -1,4 +1,9 @@
-import { Camera, MapPin, Award } from "lucide-react";
+"use client";
+
+import { useRef } from "react";
+import { Camera, MapPin, Award, Loader2 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiUpload } from "@/lib/api";
 import { DoctorProfile } from "./DoctorSettingsMain";
 
 interface Props {
@@ -13,6 +18,22 @@ export default function ProfileBanner({ doctor }: Props) {
   const fullName = doctor
     ? `Dr. ${doctor.first_name} ${doctor.last_name}`
     : "Loading...";
+
+  const fileRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => apiUpload("/api/upload/avatar", file, "avatar"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doctorProfile"] });
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) uploadMutation.mutate(file);
+    e.target.value = "";
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -30,12 +51,35 @@ export default function ProfileBanner({ doctor }: Props) {
           <div className="flex items-end gap-4">
             {/* Avatar */}
             <div className="relative">
-              <div className="w-20 h-20 rounded-2xl bg-[#E5E7EB] border-4 border-white shadow-md flex items-center justify-center">
-                <span className="text-2xl font-bold text-[#4A5565]">{initials}</span>
-              </div>
-              <button className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#0284C7] border-2 border-white flex items-center justify-center cursor-pointer">
-                <Camera className="w-3 h-3 text-white" />
+              {doctor?.photo_url ? (
+                <img
+                  src={doctor.photo_url}
+                  alt={fullName}
+                  className="w-20 h-20 rounded-2xl border-4 border-white shadow-md object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-2xl bg-[#E5E7EB] border-4 border-white shadow-md flex items-center justify-center">
+                  <span className="text-2xl font-bold text-[#4A5565]">{initials}</span>
+                </div>
+              )}
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploadMutation.isPending}
+                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#0284C7] border-2 border-white flex items-center justify-center cursor-pointer hover:opacity-90 transition"
+              >
+                {uploadMutation.isPending ? (
+                  <Loader2 className="w-3 h-3 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-3 h-3 text-white" />
+                )}
               </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFileChange}
+              />
             </div>
 
             {/* Name + info */}

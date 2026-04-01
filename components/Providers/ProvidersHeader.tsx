@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   Stethoscope,
   Plus,
+  UserCheck,
 } from "lucide-react";
 
 export default function ProvidersHeader({
@@ -23,12 +24,20 @@ export default function ProvidersHeader({
             </p>
           </div>
         </div>
-        <Link
-          href="/admin/add-provider"
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#0284C7] text-white text-sm font-semibold rounded-xl hover:opacity-90 transition"
-        >
-          <Plus className="w-4 h-4" /> Add Provider
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/pending-doctors"
+            className="flex items-center gap-2 px-4 py-2.5 border border-[#EA580C] text-[#EA580C] text-sm font-semibold rounded-xl hover:bg-[#FFF7ED] transition"
+          >
+            <UserCheck className="w-4 h-4" /> Pending Applications
+          </Link>
+          <Link
+            href="/admin/add-provider"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#0284C7] text-white text-sm font-semibold rounded-xl hover:opacity-90 transition"
+          >
+            <Plus className="w-4 h-4" /> Add Provider
+          </Link>
+        </div>
       </div>
 
       <div className="flex items-center gap-3 mt-5">

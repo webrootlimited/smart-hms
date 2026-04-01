@@ -35,3 +35,13 @@ export async function apiPatch<T = unknown>(url: string, body?: unknown): Promis
   const { data } = await instance.patch(url, body, { headers });
   return data;
 }
+
+export async function apiUpload<T = unknown>(url: string, file: File, fieldName = "file"): Promise<T> {
+  const headers = await authHeaders();
+  const formData = new FormData();
+  formData.append(fieldName, file);
+  const { data } = await instance.post(url, formData, {
+    headers: { ...headers, "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}

@@ -23,6 +23,7 @@ const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
   { label: "Appointments", icon: CalendarDays, href: "/admin/appointments" },
   { label: "Providers", icon: Stethoscope, href: "/admin/providers" },
+  { label: "Pending Doctors", icon: UserCog, href: "/admin/pending-doctors" },
   { label: "Patients", icon: UserRound, href: "/admin/patients" },
   { label: "User Management", icon: UserCog, href: "/admin/user-management" },
   { label: "Clinic Settings", icon: Settings, href: "/admin/clinic-settings" },

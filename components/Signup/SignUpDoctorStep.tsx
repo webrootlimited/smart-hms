@@ -41,6 +41,8 @@ export default function SignUpDoctorStep({
     experienceYears: number;
     consultationFee: number;
     bio: string;
+    licenseFile: File | null;
+    certificates: File[];
   }) => void;
   loading?: boolean;
 }) {
@@ -212,6 +214,8 @@ export default function SignUpDoctorStep({
             experienceYears: Number(experienceYears) || 0,
             consultationFee: Number(consultationFee),
             bio,
+            licenseFile,
+            certificates,
           })
         }
         disabled={!canSubmit}
