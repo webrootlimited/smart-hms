@@ -44,6 +44,18 @@ export default function AppointmentHeader({ appointment }: { appointment: Appoin
   const st = STATUS_STYLES[appointment.status] || STATUS_STYLES.CONFIRMED;
   const isOnline = appointment.appointment_type === "ONLINE";
 
+  const startCallMutation = useMutation({
+    mutationFn: () =>
+      apiPost<{ success: boolean; roomUrl: string }>("/api/video/room", {
+        appointmentId: appointment.id,
+      }),
+    onSuccess: (res) => {
+      if (res.success) {
+        router.push(`/doctor/${doctorSlug}/telehealth/${appointment.id}`);
+      }
+    },
+  });
+
   const messageMutation = useMutation({
     mutationFn: () =>
       apiPost<{ success: boolean; conversation: { id: string } }>(
@@ -104,8 +116,12 @@ export default function AppointmentHeader({ appointment }: { appointment: Appoin
             </button>
           )}
           {isOnline && (appointment.status === "CONFIRMED" || appointment.status === "CHECKED_IN") && (
-            <button className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer">
-              <Video className="w-4 h-4" /> Join Telehealth
+            <button
+              onClick={() => startCallMutation.mutate()}
+              disabled={startCallMutation.isPending}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer disabled:opacity-50"
+            >
+              <Video className="w-4 h-4" /> {startCallMutation.isPending ? "Starting..." : "Start Call"}
             </button>
           )}
           {appointment.status !== "COMPLETED" && appointment.status !== "CANCELLED" && (

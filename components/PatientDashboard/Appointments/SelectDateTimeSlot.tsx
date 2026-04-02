@@ -15,7 +15,7 @@ interface Doctor {
   initials: string; color: string; price: number;
 }
 
-interface TimeSlot { time: string; duration: string; }
+interface TimeSlot { time: string; duration: string; available?: boolean; }
 type GroupedSlots = Record<string, TimeSlot[]>;
 
 function formatDateLabel(date: Date) {
@@ -44,7 +44,8 @@ export default function SelectDateTimeSlot({ doctor, onBack }: { doctor: Doctor;
         `/api/patient/doctors/${doctor.id}/online-slots`, { date: dateStr }
       );
       const allSlots = Object.values(res.slots).flat();
-      if (allSlots.length > 0) setSelectedTime(allSlots[0].time);
+      const firstAvailable = allSlots.find((s) => s.available !== false);
+      if (firstAvailable) setSelectedTime(firstAvailable.time);
       else setSelectedTime("");
       return res.slots;
     },

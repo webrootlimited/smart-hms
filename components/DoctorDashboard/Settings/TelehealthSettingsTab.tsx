@@ -125,22 +125,11 @@ export default function TelehealthSettingsTab({ doctor }: Props) {
         </div>
       </div>
 
-      {/* Default settings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div>
-          <label className="block text-xs font-semibold text-[#334155] mb-1.5">Default Session Duration</label>
-          <div className="flex items-center gap-2">
-            <input type="number" defaultValue={30} className="w-20 px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7]" />
-            <span className="text-sm text-[#6A7282]">minutes</span>
-          </div>
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-[#334155] mb-1.5">Max Waiting Time</label>
-          <div className="flex items-center gap-2">
-            <input type="number" defaultValue={15} className="w-20 px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7]" />
-            <span className="text-sm text-[#6A7282]">minutes</span>
-          </div>
-        </div>
+      {/* Note about session duration */}
+      <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl px-4 py-3">
+        <p className="text-xs text-[#0284C7] font-medium">
+          Session duration is configured in the Work Hours tab as "Slot Duration" for each schedule type.
+        </p>
       </div>
     </div>
   );

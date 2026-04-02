@@ -58,10 +58,15 @@ export default function PaymentDialog({
     return d.toISOString();
   }
 
+  // Prevent double submission
+  const [paymentInFlight, setPaymentInFlight] = useState(false);
+
   // Pay with saved card
   const payMutation = useMutation({
-    mutationFn: () =>
-      apiPost<{ success: boolean; requires_action?: boolean; client_secret?: string }>(
+    mutationFn: () => {
+      if (paymentInFlight) throw new Error("Payment already in progress");
+      setPaymentInFlight(true);
+      return apiPost<{ success: boolean; requires_action?: boolean; client_secret?: string }>(
         "/api/patient/payments/create-intent",
         {
           doctor_id: doctorId,
@@ -71,7 +76,8 @@ export default function PaymentDialog({
           appointment_type: appointmentType,
           ...(clinicId ? { clinic_id: clinicId } : {}),
         }
-      ),
+      );
+    },
     onSuccess: (res) => {
       if (res.success) {
         queryClient.invalidateQueries({ queryKey: queryKeys.patientPayments });
@@ -79,6 +85,7 @@ export default function PaymentDialog({
         else setConfirmed(true);
       }
     },
+    onSettled: () => setPaymentInFlight(false),
   });
 
   // Fetch setup intent for new card flow
@@ -246,7 +253,7 @@ export default function PaymentDialog({
               </div>
               <button
                 onClick={() => payMutation.mutate()}
-                disabled={!selectedCard || payMutation.isPending}
+                disabled={!selectedCard || payMutation.isPending || paymentInFlight}
                 className="w-full py-3.5 bg-linear-to-r from-[#16A34A] to-[#059669] text-white text-sm font-bold rounded-xl hover:opacity-90 transition cursor-pointer disabled:opacity-50"
               >
                 {payMutation.isPending ? (

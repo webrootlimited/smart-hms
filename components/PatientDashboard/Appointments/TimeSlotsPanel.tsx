@@ -5,6 +5,7 @@ import { Clock, Video, Loader2 } from "lucide-react";
 interface TimeSlot {
   time: string;
   duration: string;
+  available?: boolean;
 }
 
 type GroupedSlots = Record<string, TimeSlot[]>;
@@ -49,19 +50,27 @@ export default function TimeSlotsPanel({
               <p className="text-xs font-semibold text-[#6A7282] uppercase tracking-wide mb-2.5">{period}</p>
               <div className="grid grid-cols-2 gap-3">
                 {periodSlots.map((slot) => {
-                  const isSelected = selectedTime === slot.time;
+                  const isBooked = slot.available === false;
+                  const isSelected = selectedTime === slot.time && !isBooked;
                   return (
                     <button
                       key={slot.time}
-                      onClick={() => onSelectTime(slot.time)}
-                      className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border text-left transition cursor-pointer ${
-                        isSelected ? "bg-[#7C3AED] text-white border-[#7C3AED] shadow-md" : "bg-white text-[#4A5565] border-gray-200 hover:border-[#7C3AED]/40"
+                      onClick={() => !isBooked && onSelectTime(slot.time)}
+                      disabled={isBooked}
+                      className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border text-left transition ${
+                        isBooked
+                          ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed opacity-60"
+                          : isSelected
+                            ? "bg-[#7C3AED] text-white border-[#7C3AED] shadow-md cursor-pointer"
+                            : "bg-white text-[#4A5565] border-gray-200 hover:border-[#7C3AED]/40 cursor-pointer"
                       }`}
                     >
-                      <Video className={`w-4 h-4 shrink-0 ${isSelected ? "text-white/70" : "text-[#7C3AED]"}`} />
+                      <Video className={`w-4 h-4 shrink-0 ${isBooked ? "text-gray-300" : isSelected ? "text-white/70" : "text-[#7C3AED]"}`} />
                       <div>
                         <p className="text-sm font-semibold">{slot.time}</p>
-                        <p className={`text-[10px] ${isSelected ? "text-white/70" : "text-[#6A7282]"}`}>{slot.duration}</p>
+                        <p className={`text-[10px] ${isBooked ? "text-red-400 font-semibold" : isSelected ? "text-white/70" : "text-[#6A7282]"}`}>
+                          {isBooked ? "Booked" : slot.duration}
+                        </p>
                       </div>
                     </button>
                   );

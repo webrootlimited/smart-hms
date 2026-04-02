@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock, Video, MapPin, MessageSquare } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { apiPost } from "@/lib/api";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiFetch, apiPost } from "@/lib/api";
 import type { PatientAppointmentDetail } from "./types";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -44,6 +44,16 @@ export default function DetailHeader({ appointment }: { appointment: PatientAppo
   const base = `/patient/${params.patientName}/appointments`;
   const st = STATUS_STYLES[appointment.status] || STATUS_STYLES.CONFIRMED;
   const isOnline = appointment.appointment_type === "ONLINE";
+
+  // Check if video room exists for this appointment
+  const { data: roomData } = useQuery({
+    queryKey: ["videoRoom", appointment.id],
+    queryFn: () => apiFetch<{ success: boolean; room: { roomUrl: string } | null }>(`/api/video/room/${appointment.id}`),
+    enabled: isOnline && (appointment.status === "CONFIRMED" || appointment.status === "CHECKED_IN"),
+    refetchInterval: 10000, // Poll every 10s to detect when doctor starts
+  });
+
+  const hasActiveRoom = !!roomData?.room?.roomUrl;
 
   const messageMutation = useMutation({
     mutationFn: () =>
@@ -101,10 +111,18 @@ export default function DetailHeader({ appointment }: { appointment: PatientAppo
               <MessageSquare className="w-4 h-4" /> Message Doctor
             </button>
           )}
-          {isOnline && (appointment.status === "CONFIRMED" || appointment.status === "CHECKED_IN") && (
-            <button className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#0284C7] text-white rounded-xl hover:opacity-90 transition cursor-pointer">
+          {isOnline && hasActiveRoom && (
+            <button
+              onClick={() => router.push(`/patient/${params.patientName}/telehealth/${appointment.id}`)}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold bg-[#16A34A] text-white rounded-xl hover:opacity-90 transition cursor-pointer animate-pulse"
+            >
               <Video className="w-4 h-4" /> Join Video Call
             </button>
+          )}
+          {isOnline && !hasActiveRoom && (appointment.status === "CONFIRMED" || appointment.status === "CHECKED_IN") && (
+            <span className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-[#6A7282] bg-gray-100 rounded-xl">
+              <Video className="w-4 h-4" /> Waiting for doctor...
+            </span>
           )}
         </div>
       </div>

@@ -22,7 +22,10 @@ interface AvailabilityItem {
   day_of_week: number;
   start_time: string;
   end_time: string;
+  slot_duration?: number;
 }
+
+const DURATION_OPTIONS = [15, 20, 30, 45, 60];
 
 const buildEmpty = (): DaySchedule[] =>
   DAY_NAMES.map((day, i) => ({ day, day_of_week: i, start_time: "", end_time: "", active: false }));
@@ -39,21 +42,31 @@ function applyAvailability(avail: AvailabilityItem[]): DaySchedule[] {
   return buildEmpty();
 }
 
+function getSlotDuration(avail: AvailabilityItem[]): number {
+  const first = avail?.find((a) => a.slot_duration);
+  return first?.slot_duration || 30;
+}
+
 export default function WorkHoursTab() {
   const queryClient = useQueryClient();
   const [activeType, setActiveType] = useState<ScheduleType>("OFFLINE");
   const [offlineSchedule, setOfflineSchedule] = useState<DaySchedule[]>(buildEmpty());
   const [onlineSchedule, setOnlineSchedule] = useState<DaySchedule[]>(buildEmpty());
+  const [offlineDuration, setOfflineDuration] = useState(30);
+  const [onlineDuration, setOnlineDuration] = useState(30);
   const [saved, setSaved] = useState(false);
 
   const schedule = activeType === "OFFLINE" ? offlineSchedule : onlineSchedule;
   const setSchedule = activeType === "OFFLINE" ? setOfflineSchedule : setOnlineSchedule;
+  const slotDuration = activeType === "OFFLINE" ? offlineDuration : onlineDuration;
+  const setSlotDuration = activeType === "OFFLINE" ? setOfflineDuration : setOnlineDuration;
 
   useQuery({
     queryKey: queryKeys.doctorAvailability("OFFLINE"),
     queryFn: async () => {
       const res = await apiFetch<{ success: boolean; availability: AvailabilityItem[] }>("/api/doctor/availability", { type: "OFFLINE" });
       setOfflineSchedule(applyAvailability(res.availability));
+      setOfflineDuration(getSlotDuration(res.availability));
       return res.availability;
     },
   });
@@ -63,12 +76,13 @@ export default function WorkHoursTab() {
     queryFn: async () => {
       const res = await apiFetch<{ success: boolean; availability: AvailabilityItem[] }>("/api/doctor/availability", { type: "ONLINE" });
       setOnlineSchedule(applyAvailability(res.availability));
+      setOnlineDuration(getSlotDuration(res.availability));
       return res.availability;
     },
   });
 
   const { mutate, isPending, error } = useMutation({
-    mutationFn: () => apiPut("/api/doctor/availability", { schedule, type: activeType }),
+    mutationFn: () => apiPut("/api/doctor/availability", { schedule, type: activeType, slot_duration: slotDuration }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.doctorAvailability(activeType) });
       setSaved(true);
@@ -129,6 +143,27 @@ export default function WorkHoursTab() {
           <Globe className="w-4 h-4" />
           Online
         </button>
+      </div>
+
+      {/* Slot Duration */}
+      <div className="flex items-center gap-3 p-3 bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl">
+        <Clock className="w-4 h-4 text-[#0284C7] shrink-0" />
+        <span className="text-sm font-medium text-[#101828]">Slot Duration:</span>
+        <div className="flex items-center gap-1">
+          {DURATION_OPTIONS.map((d) => (
+            <button
+              key={d}
+              onClick={() => setSlotDuration(d)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer ${
+                slotDuration === d
+                  ? "bg-[#0284C7] text-white"
+                  : "bg-white text-[#4A5565] border border-gray-200 hover:border-[#0284C7]"
+              }`}
+            >
+              {d} min
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Schedule rows */}

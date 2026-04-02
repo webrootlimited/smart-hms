@@ -6,11 +6,11 @@ import { apiFetch } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import DailyVideoCall from "@/components/shared/VideoCall/DailyVideoCall";
 
-export default function DoctorVideoCallPage() {
+export default function PatientVideoCallPage() {
   const params = useParams();
   const router = useRouter();
   const appointmentId = params.sessionId as string;
-  const doctorSlug = params.doctorName as string;
+  const patientSlug = params.patientName as string;
 
   const { data, isLoading } = useQuery({
     queryKey: ["videoRoom", appointmentId],
@@ -32,8 +32,8 @@ export default function DoctorVideoCallPage() {
     return (
       <div className="flex items-center justify-center h-[80vh]">
         <div className="text-center">
-          <p className="text-lg font-bold text-[#101828]">No active video call</p>
-          <p className="text-sm text-[#6A7282] mt-1">The video room has not been created yet.</p>
+          <p className="text-lg font-bold text-[#101828]">Waiting for doctor</p>
+          <p className="text-sm text-[#6A7282] mt-1">The doctor hasn't started the video call yet.</p>
         </div>
       </div>
     );
@@ -44,8 +44,8 @@ export default function DoctorVideoCallPage() {
       <DailyVideoCall
         roomUrl={data.room.roomUrl}
         appointmentId={appointmentId}
-        userName="Doctor"
-        onLeave={() => router.push(`/doctor/${doctorSlug}/appointments`)}
+        userName="Patient"
+        onLeave={() => router.push(`/patient/${patientSlug}/appointments`)}
       />
     </div>
   );
