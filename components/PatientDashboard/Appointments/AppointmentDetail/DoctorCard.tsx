@@ -1,4 +1,9 @@
+"use client";
+
 import { Phone, Video, MapPin } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
 import type { PatientAppointmentDetail } from "./types";
 
 const COLORS = ["#0284C7", "#7C3AED", "#059669", "#EA580C", "#0891B2", "#D946EF", "#CA8A04"];
@@ -9,8 +14,19 @@ function getColor(name: string) {
 }
 
 export default function DoctorCard({ appointment }: { appointment: PatientAppointmentDetail }) {
+  const params = useParams();
+  const router = useRouter();
   const { doctor, clinic } = appointment;
   const isOnline = appointment.appointment_type === "ONLINE";
+
+  const { data: roomData } = useQuery({
+    queryKey: ["videoRoom", appointment.id],
+    queryFn: () => apiFetch<{ success: boolean; room: { roomUrl: string } | null }>(`/api/video/room/${appointment.id}`),
+    enabled: isOnline && (appointment.status === "CONFIRMED" || appointment.status === "CHECKED_IN"),
+    refetchInterval: 10000,
+  });
+
+  const hasActiveRoom = !!roomData?.room?.roomUrl;
 
   return (
     <div className="space-y-4">
@@ -58,10 +74,16 @@ export default function DoctorCard({ appointment }: { appointment: PatientAppoin
           <p className="text-xs text-white/80 mb-4">
             Your video consultation will take place online. Make sure you have a stable internet connection.
           </p>
-          {(appointment.status === "CONFIRMED" || appointment.status === "CHECKED_IN") && (
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-[#7C3AED] text-sm font-semibold rounded-xl hover:bg-white/90 transition cursor-pointer">
+          {(appointment.status === "CONFIRMED" || appointment.status === "CHECKED_IN") && hasActiveRoom && (
+            <button
+              onClick={() => router.push(`/patient/${params.patientName}/telehealth/${appointment.id}`)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-[#7C3AED] text-sm font-semibold rounded-xl hover:bg-white/90 transition cursor-pointer animate-pulse"
+            >
               <Video className="w-4 h-4" /> Join Video Call
             </button>
+          )}
+          {(appointment.status === "CONFIRMED" || appointment.status === "CHECKED_IN") && !hasActiveRoom && (
+            <p className="text-center text-xs text-white/70">Waiting for doctor to start call...</p>
           )}
         </div>
       ) : clinic ? (

@@ -1,9 +1,29 @@
+"use client";
+
 import { Video, MapPin } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { apiPost } from "@/lib/api";
 import type { AppointmentDetail } from "./types";
 
 export default function TelehealthCard({ appointment }: { appointment: AppointmentDetail }) {
+  const params = useParams();
+  const router = useRouter();
+  const doctorSlug = params.doctorName as string;
   const isOnline = appointment.appointment_type === "ONLINE";
   const isActive = appointment.status === "CONFIRMED" || appointment.status === "CHECKED_IN";
+
+  const startCallMutation = useMutation({
+    mutationFn: () =>
+      apiPost<{ success: boolean; roomUrl: string }>("/api/video/room", {
+        appointmentId: appointment.id,
+      }),
+    onSuccess: (res) => {
+      if (res.success) {
+        router.push(`/doctor/${doctorSlug}/telehealth/${appointment.id}`);
+      }
+    },
+  });
 
   if (isOnline) {
     return (
@@ -17,8 +37,12 @@ export default function TelehealthCard({ appointment }: { appointment: Appointme
         </div>
 
         {isActive ? (
-          <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-[#0284C7] text-sm font-semibold rounded-xl hover:bg-white/90 transition cursor-pointer">
-            <Video className="w-4 h-4" /> Join Video Call
+          <button
+            onClick={() => startCallMutation.mutate()}
+            disabled={startCallMutation.isPending}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-[#0284C7] text-sm font-semibold rounded-xl hover:bg-white/90 transition cursor-pointer disabled:opacity-50"
+          >
+            <Video className="w-4 h-4" /> {startCallMutation.isPending ? "Starting..." : "Join Video Call"}
           </button>
         ) : (
           <p className="text-center text-sm text-white/70">

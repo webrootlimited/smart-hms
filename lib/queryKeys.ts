@@ -38,4 +38,6 @@ export const queryKeys = {
     ["notifications", role, params] as const,
   unreadNotificationCount: (role: string) =>
     ["notifications", role, "unread-count"] as const,
+  patientMedicalRecords: (type: string, search: string) =>
+    ["patient", "medical-records", type, search] as const,
 };
