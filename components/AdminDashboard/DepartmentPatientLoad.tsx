@@ -10,17 +10,11 @@ import {
   Cell,
 } from "recharts";
 
-const data = [
-  { name: "Emergency", value: 145 },
-  { name: "Cardiology", value: 110 },
-  { name: "Neurology", value: 80 },
-  { name: "Orthopedics", value: 65 },
-  { name: "Pediatrics", value: 30 },
-];
+interface Bar { name: string; value: number }
 
 const COLORS = ["#2F548B", "#3D6BA8", "#4D8BE9", "#6FA3F0", "#A3C4F7"];
 
-export default function DepartmentPatientLoad() {
+export default function DepartmentPatientLoad({ data = [] }: { data?: Bar[] }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
       <h3 className="text-base font-bold text-[#101828] mb-4">

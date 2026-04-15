@@ -10,20 +10,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const data = [
-  { time: "8am", value: 20 },
-  { time: "9am", value: 35 },
-  { time: "10am", value: 45 },
-  { time: "11am", value: 50 },
-  { time: "12pm", value: 55 },
-  { time: "1pm", value: 65 },
-  { time: "2pm", value: 75 },
-  { time: "3pm", value: 85 },
-  { time: "4pm", value: 70 },
-  { time: "5pm", value: 60 },
-];
+interface Point { time: string; value: number }
 
-export default function DailyAppointmentChart() {
+export default function DailyAppointmentChart({ data = [] }: { data?: Point[] }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
       <h3 className="text-base font-bold text-[#1E293B] mb-4">

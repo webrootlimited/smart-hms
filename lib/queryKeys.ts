@@ -44,4 +44,5 @@ export const queryKeys = {
     ["doctor", "documents", type, search] as const,
   doctorPatientAppointments: (patientId: string) =>
     ["doctor", "patient-appointments", patientId] as const,
+  adminDashboardStats: ["admin", "dashboard-stats"] as const,
 };

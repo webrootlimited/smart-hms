@@ -2,12 +2,12 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
-const data = [
-  { name: "Utilized", value: 78 },
-  { name: "Available", value: 22 },
-];
+interface Slice { name: string; value: number }
 
-export default function ProviderUtilizationChart() {
+export default function ProviderUtilizationChart({
+  data = [{ name: "Utilized", value: 0 }, { name: "Available", value: 100 }],
+  utilizationPct = 0,
+}: { data?: Slice[]; utilizationPct?: number }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
       <h3 className="text-base font-bold text-[#101828] mb-2">
@@ -44,7 +44,7 @@ export default function ProviderUtilizationChart() {
               className="text-2xl font-bold"
               fill="#1E293B"
             >
-              78%
+              {utilizationPct}%
             </text>
             <text
               x="50%"

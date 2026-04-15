@@ -10,17 +10,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const data = [
-  { day: "Mon", value: 40 },
-  { day: "Tue", value: 55 },
-  { day: "Wed", value: 45 },
-  { day: "Thu", value: 70 },
-  { day: "Fri", value: 60 },
-  { day: "Sat", value: 50 },
-  { day: "Sun", value: 45 },
-];
+interface Point { day: string; value: number }
 
-export default function PeakHoursChart() {
+export default function PeakHoursChart({ data = [] }: { data?: Point[] }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
       <h3 className="text-base font-bold text-[#1E293B] mb-4">
